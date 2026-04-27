@@ -136,3 +136,35 @@ export async function deleteMediaAction(id: string) {
     return { success: false, error: "Failed to delete from database" };
   }
 }
+
+export async function getPublicGalleryAction() {
+  noStore();
+  try {
+    await connectToDB();
+    const projects = await Project.find().lean();
+    const media = await Media.find().lean();
+    
+    // Sort projects by latest media item
+    const projectsWithLatestMedia = projects.map(p => {
+      const projectMedia = media.filter(m => m.projectId?.toString() === p._id.toString());
+      const latestMedia = projectMedia.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())[0];
+      return {
+        ...p,
+        latestMediaDate: latestMedia ? latestMedia.createdAt : p.createdAt
+      };
+    });
+
+    const sortedProjects = projectsWithLatestMedia.sort((a, b) => new Date(b.latestMediaDate!).getTime() - new Date(a.latestMediaDate!).getTime());
+
+    return { 
+      success: true, 
+      data: {
+        projects: JSON.parse(JSON.stringify(sortedProjects)),
+        media: JSON.parse(JSON.stringify(media))
+      } 
+    };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return { success: false, error: "Failed to fetch public gallery data." };
+  }
+}

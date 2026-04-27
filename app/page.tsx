@@ -1,23 +1,27 @@
-import { connectToDB } from "@/lib/db";
-import { Media } from "@/lib/models";
-import { MediaGallery } from "@/components/MediaGallery";
+import { getPublicGalleryAction } from "@/lib/actions";
+import { PublicBookViewer } from "@/components/PublicBookViewer";
 
 export default async function Home() {
-  await connectToDB();
-  const galleryItems = await Media.find().populate("projectId").sort({ createdAt: -1 });
+  const res = await getPublicGalleryAction();
+
+  if (!res.success || !res.data) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="text-center p-8 bg-white rounded-xl shadow-sm border border-red-100">
+          <p className="text-red-500 font-medium">Failed to load portfolio data.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { projects, media } = res.data;
 
   return (
-    <main className="container mx-auto py-12 px-4 lg:px-8">
-      <div className="max-w-3xl mx-auto text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-linear-to-r from-slate-900 to-slate-500">
-          Media Gallery
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          Explore our collection of high-quality photos and videos.
-        </p>
-      </div>
-
-      <MediaGallery items={JSON.parse(JSON.stringify(galleryItems))} />
-    </main>
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      <nav className="h-16 border-b border-slate-200 flex items-center justify-center px-6 bg-white sticky top-0 z-50 shadow-sm">
+        <span className="font-extrabold text-2xl tracking-[0.2em] uppercase text-slate-900 text-center">Ehas</span>
+      </nav>
+      <PublicBookViewer projects={projects} media={media} />
+    </div>
   );
 }
