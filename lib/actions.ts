@@ -6,10 +6,10 @@ import { Media, Project } from "./models";
 import { UTApi } from "uploadthing/server";
 import { fetchYouTubeMetadata } from "../utils/youtube";
 
-export async function createProjectAction(name: string) {
+export async function createProjectAction(name: string, thumbnailUrl?: string) {
   try {
     await connectToDB();
-    const newProject = new Project({ name });
+    const newProject = new Project({ name, thumbnailUrl });
     await newProject.save();
     revalidatePath("/admin");
     return { success: true, data: JSON.parse(JSON.stringify(newProject)) };
@@ -59,12 +59,15 @@ export async function renameProjectAction(id: string, newName: string) {
 }
 
 export async function saveMediaAction(data: {
+  _id?: string;
   title: string;
-  type: "image" | "video";
-  url: string;
+  type: "image" | "video" | "text-image";
+  url?: string;
   projectId?: string;
   fileKey?: string;
   thumbnailUrl?: string;
+  textContent?: string;
+  imageAlignment?: "left" | "right";
 }) {
   try {
     await connectToDB();
@@ -72,7 +75,7 @@ export async function saveMediaAction(data: {
     let finalTitle = data.title;
     let finalThumbnail = data.thumbnailUrl;
 
-    if (data.type === "video") {
+    if (data.type === "video" && data.url) {
       const meta = await fetchYouTubeMetadata(data.url);
       if (meta) {
         finalTitle = meta.title;
@@ -80,19 +83,38 @@ export async function saveMediaAction(data: {
       }
     }
 
-    const newMedia = new Media({
-      title: finalTitle,
-      type: data.type,
-      url: data.url,
-      projectId: data.projectId,
-      thumbnailUrl: finalThumbnail,
-      fileKey: data.fileKey,
-    });
+    if (data._id) {
+      // Update existing media
+      await Media.findByIdAndUpdate(data._id, {
+        title: finalTitle,
+        url: data.url,
+        thumbnailUrl: finalThumbnail,
+        textContent: data.textContent,
+        imageAlignment: data.imageAlignment || "left",
+      });
+    } else {
+      // Create new media
+      const lastMedia = await Media.findOne({ projectId: data.projectId }).sort({ order: -1 });
+      const nextOrder = lastMedia ? (lastMedia.order || 0) + 1 : 0;
 
-    await newMedia.save();
+      const newMedia = new Media({
+        title: finalTitle,
+        type: data.type,
+        url: data.url,
+        projectId: data.projectId,
+        thumbnailUrl: finalThumbnail,
+        fileKey: data.fileKey,
+        textContent: data.textContent,
+        imageAlignment: data.imageAlignment || "left",
+        order: nextOrder,
+      });
+
+      await newMedia.save();
+    }
 
     // Refresh the landing page data cache
     revalidatePath("/");
+    revalidatePath("/admin");
 
     return { success: true };
   } catch (error) {
@@ -105,7 +127,7 @@ export async function getAdminMediaAction() {
   noStore();
   try {
     await connectToDB();
-    const media = await Media.find().populate("projectId").sort({ createdAt: -1 });
+    const media = await Media.find().populate("projectId").sort({ order: 1, createdAt: -1 });
     return { success: true, data: JSON.parse(JSON.stringify(media)) };
   } catch (error) {
     console.error("Database Error:", error);
@@ -160,11 +182,43 @@ export async function getPublicGalleryAction() {
       success: true, 
       data: {
         projects: JSON.parse(JSON.stringify(sortedProjects)),
-        media: JSON.parse(JSON.stringify(media))
+        media: JSON.parse(JSON.stringify(media.sort((a, b) => (a.order || 0) - (b.order || 0))))
       } 
     };
   } catch (error) {
     console.error("Database Error:", error);
     return { success: false, error: "Failed to fetch public gallery data." };
+  }
+}
+
+export async function updateMediaOrderAction(updates: { id: string, order: number }[]) {
+  try {
+    await connectToDB();
+    const bulkOps = updates.map((update) => ({
+      updateOne: {
+        filter: { _id: update.id },
+        update: { order: update.order },
+      },
+    }));
+    await Media.bulkWrite(bulkOps);
+    revalidatePath("/");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return { success: false, error: "Failed to update order" };
+  }
+}
+
+export async function updateProjectAction(id: string, updates: { name?: string, thumbnailUrl?: string }) {
+  try {
+    await connectToDB();
+    await Project.findByIdAndUpdate(id, updates);
+    revalidatePath("/admin");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return { success: false, error: "Failed to update project" };
   }
 }
