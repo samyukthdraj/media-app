@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, Play, X, ChevronLeft, ChevronRight, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import OverflowTooltipText from "@/components/OverflowTooltipText";
 
 interface MediaItem {
   _id: string;
@@ -199,9 +200,10 @@ export function PublicBookViewer({
               <Menu className="w-6 h-6 text-slate-800" />
             </Button>
           </div>
-          <span className="font-bold text-sm truncate max-w-[200px] text-slate-800 uppercase tracking-wider text-center">
-            {projects.find(p => p._id === activeProjectId)?.name || "Select Project"}
-          </span>
+          <OverflowTooltipText
+            text={projects.find(p => p._id === activeProjectId)?.name || "Select Project"}
+            className="font-bold text-sm truncate max-w-[200px] text-slate-800 uppercase tracking-wider text-center"
+          />
         </div>
 
         {/* Sticky Video Zone */}

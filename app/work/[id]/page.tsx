@@ -1,5 +1,6 @@
 import { getPublicGalleryAction } from "@/lib/actions";
 import ProjectDetailViewer from "@/components/ProjectDetailViewer";
+import { IProject, IMedia } from "@/lib/models";
 
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -15,7 +16,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  const project = res.data.projects.find((p: any) => p._id === id);
+  const project = (res.data.projects as IProject[]).find((p: IProject) => p._id === id);
   if (!project) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white border border-red-500">
@@ -24,7 +25,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  const projectMedia = res.data.media.filter((m: any) => m.projectId?.toString() === id || (m.projectId && m.projectId._id === id));
+  const projectMedia = (res.data.media as IMedia[]).filter((m: IMedia) => {
+    const pId = m.projectId;
+    const matchesId = typeof pId === 'string' ? pId === id : pId?._id === id;
+    return (matchesId && !!m.url) || (matchesId && m.type === 'text-image');
+  });
+
+
 
   return <ProjectDetailViewer project={project} media={projectMedia} />;
 }

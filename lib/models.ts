@@ -1,4 +1,25 @@
-import mongoose, { Schema, model, models } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
+
+export interface IProject {
+  _id: string;
+  name: string;
+  thumbnailUrl?: string;
+  createdAt?: string; // Using string because of JSON.parse(JSON.stringify())
+}
+
+export interface IMedia {
+  _id: string;
+  title: string;
+  type: "image" | "video" | "text-image";
+  url?: string;
+  textContent?: string;
+  imageAlignment?: "left" | "right";
+  thumbnailUrl?: string;
+  fileKey?: string;
+  projectId?: string | IProject; // Can be string ID or populated Project object
+  order?: number;
+  createdAt?: string; // Using string because of JSON.parse(JSON.stringify())
+}
 
 const ProjectSchema = new Schema({
   name: { type: String, required: true },
@@ -24,3 +45,4 @@ const MediaSchema = new Schema({
 
 delete mongoose.models.Media;
 export const Media = model("Media", MediaSchema);
+

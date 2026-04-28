@@ -1,7 +1,9 @@
 import { getPublicGalleryAction } from "@/lib/actions";
 import { Navbar, Footer } from "@/components/PublicLayout";
+import OverflowTooltipText from "@/components/OverflowTooltipText";
 import Image from "next/image";
 import Link from "next/link";
+import { IProject } from "@/lib/models";
 
 export default async function WorkPage() {
   const res = await getPublicGalleryAction();
@@ -17,14 +19,15 @@ export default async function WorkPage() {
   const { projects } = res.data;
 
   return (
-    <div className="flex flex-col min-h-screen bg-white font-sans">
+    <div className="flex flex-col min-h-screen bg-white font-sans overflow-x-hidden">
       <Navbar />
 
       <main className="flex-1 w-full max-w-[1600px] mx-auto px-6 lg:px-12 py-8 lg:py-12">
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
-          {projects.map((project: any) => (
-            <Link href={`/work/${project._id}`} key={project._id} className="group flex flex-col gap-4">
+          {(projects as IProject[]).map((project: IProject) => (
+
+            <Link href={`/work/${project._id}`} key={project._id} className="group flex flex-col gap-4 min-w-0">
               <div className="w-full aspect-square md:aspect-4/3 relative bg-slate-100 overflow-hidden border border-slate-200">
                 {project.thumbnailUrl ? (
                   <Image 
@@ -39,10 +42,12 @@ export default async function WorkPage() {
                   </div>
                 )}
               </div>
-              <div className="text-center">
-                <h3 className="text-lg md:text-xl font-bold text-slate-900 uppercase tracking-wide group-hover:text-primary transition-colors">
-                  {project.name}
-                </h3>
+              <div className="text-center w-full min-w-0">
+                <OverflowTooltipText
+                  as="h3"
+                  text={project.name}
+                  className="block w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-lg md:text-xl font-bold text-slate-900 uppercase tracking-wide group-hover:text-primary transition-colors"
+                />
               </div>
             </Link>
           ))}

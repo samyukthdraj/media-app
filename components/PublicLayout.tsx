@@ -12,38 +12,41 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="h-20 lg:h-24 w-full border-b border-slate-200 flex items-center justify-between px-6 lg:px-12 bg-white sticky top-0 z-50">
-        
-        {/* Left Side: Mobile Back or Desktop Links */}
-        <div className="flex-1 flex items-center">
-          {isWorkPage && (
-            <button 
-              onClick={() => window.history.back()} 
-              className="md:hidden text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-primary transition-colors flex items-center gap-1"
-            >
-              ← Back
-            </button>
-          )}
+      <nav className="h-20 lg:h-24 w-full border-b border-slate-200 bg-white sticky top-0 z-50">
+        <div className="max-w-[1600px] mx-auto h-full flex items-center justify-between px-6 lg:px-12 relative">
+          
+          {/* Left Side: Mobile Back or Desktop Links */}
+          <div className="flex-1 flex items-center">
+            {isWorkPage && (
+              <button 
+                onClick={() => window.history.back()} 
+                className="md:hidden text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-primary transition-colors flex items-center gap-1"
+              >
+                ← Back
+              </button>
+            )}
 
-          <div className="hidden md:flex gap-6 items-center text-xs lg:text-sm font-semibold tracking-widest uppercase">
-            <Link href="/" className={`hover:text-primary transition-colors ${pathname === '/' ? 'text-primary' : 'text-slate-500'}`}>Home</Link>
-            <Link href="/work" className={`hover:text-primary transition-colors ${pathname === '/work' ? 'text-primary' : 'text-slate-500'}`}>Work</Link>
+            <div className="hidden md:flex gap-6 items-center text-xs lg:text-sm font-semibold tracking-widest uppercase">
+              <Link href="/" className={`hover:text-primary transition-colors ${pathname === '/' ? 'text-primary' : 'text-slate-500'}`}>Home</Link>
+              <Link href="/work" className={`hover:text-primary transition-colors ${pathname === '/work' ? 'text-primary' : 'text-slate-500'}`}>Work</Link>
+            </div>
+          </div>
+
+          {/* Center: Logo */}
+          <Link href="/" className="font-extrabold text-2xl md:text-3xl tracking-[0.3em] uppercase text-slate-900 absolute left-1/2 -translate-x-1/2 z-50">
+            Ehas
+          </Link>
+          
+          {/* Right Side: Mobile Hamburger or Desktop Placeholder */}
+          <div className="flex-1 flex justify-end items-center">
+            <button className="md:hidden p-2 text-slate-800" onClick={() => setIsOpen(true)}>
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="hidden md:block w-20"></div>
           </div>
         </div>
-
-        {/* Center: Logo */}
-        <Link href="/" className="font-extrabold text-2xl md:text-3xl tracking-[0.3em] uppercase text-slate-900 absolute left-1/2 -translate-x-1/2 z-50">
-          Ehas
-        </Link>
-        
-        {/* Right Side: Mobile Hamburger or Desktop Placeholder */}
-        <div className="flex-1 flex justify-end items-center">
-          <button className="md:hidden p-2 text-slate-800" onClick={() => setIsOpen(true)}>
-            <Menu className="w-6 h-6" />
-          </button>
-          <div className="hidden md:block w-20"></div>
-        </div>
       </nav>
+
 
       {/* Mobile Menu Overlay */}
       {isOpen && (

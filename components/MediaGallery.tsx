@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import OverflowTooltipText from "@/components/OverflowTooltipText";
 import { PlaySquare, Image as ImageIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -111,7 +112,11 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
             </div>
             <div className="p-4 flex-1">
               <div className="flex items-center justify-between gap-2 mb-1">
-                <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors" title={item.title}>{item.title}</h3>
+                <OverflowTooltipText
+                  as="h3"
+                  text={item.title}
+                  className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors"
+                />
                 {item.projectId && (
                   <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter shrink-0">
                     {item.projectId.name}

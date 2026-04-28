@@ -24,7 +24,7 @@ export async function fetchYouTubeMetadata(videoId: string) {
       title: data.title || "YouTube Video",
       thumbnailUrl: data.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
     };
-  } catch (err) {
+  } catch {
     return {
         title: "YouTube Video",
         thumbnailUrl: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`

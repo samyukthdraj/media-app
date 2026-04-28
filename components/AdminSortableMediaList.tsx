@@ -22,6 +22,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import OverflowTooltipText from "@/components/OverflowTooltipText";
 import { PlaySquare, Trash2, Loader2, GripVertical, FileText, AlignLeft, AlignRight, Pencil } from "lucide-react";
 import { useMutation, useQueryClient, QueryClient } from "@tanstack/react-query";
 import { updateMediaOrderAction, deleteMediaAction, saveMediaAction } from "@/lib/actions";
@@ -94,9 +95,10 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
     <Card 
       ref={setNodeRef} 
       style={style} 
-      className="overflow-hidden group border-muted shadow-sm hover:shadow-md transition-shadow relative bg-white flex flex-col"
+      className="group border-muted shadow-sm hover:shadow-md transition-shadow relative bg-white flex flex-col rounded-xl"
     >
-      <div className="relative aspect-video bg-muted/20">
+      <div className="relative aspect-video bg-muted/20 rounded-t-xl overflow-hidden">
+
          <Image 
             src={item.type === 'video' ? (item.thumbnailUrl || `https://img.youtube.com/vi/${item.url}/mqdefault.jpg`) : item.url} 
             alt={item.title} 
@@ -119,11 +121,31 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
       )}
 
       <div className="p-3 flex flex-col gap-2 mt-auto">
-         <div className="flex items-center gap-2">
-           <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing hover:bg-slate-100 p-1 rounded touch-none">
-             <GripVertical className="text-slate-400 w-5 h-5"/>
-           </div>
-           <p className="text-sm font-medium line-clamp-1 truncate flex-1">{item.title}</p>
+         <div className="flex items-center gap-2 min-w-0">
+            <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing hover:bg-slate-100 p-1 rounded touch-none shrink-0">
+              <GripVertical className="text-slate-400 w-5 h-5"/>
+            </div>
+            <div className="flex-1 min-w-0">
+              <OverflowTooltipText 
+                as="p" 
+                text={item.title} 
+                className="text-sm font-medium truncate" 
+              />
+            </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-red-500 hover:bg-red-50 hover:text-red-600 h-7 w-7 shrink-0" 
+              onClick={(e) => {
+                 e.stopPropagation();
+                 if (confirm(`Permanently delete "${item.title}"?`)) {
+                   deleteMutation.mutate(item._id);
+                 }
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin"/> : <Trash2 className="w-4 h-4" />}
+            </Button>
          </div>
          <div className="flex items-center justify-between border-t border-muted/50 pt-2">
             <div className="flex items-center gap-2">
@@ -181,18 +203,6 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
                   </DialogContent>
                 </Dialog>
               )}
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-red-500 hover:bg-red-50 p-0 h-8 w-8 disabled:opacity-50" 
-                onClick={(e) => {
-                   e.stopPropagation();
-                   deleteMutation.mutate(item._id);
-                }}
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin"/> : <Trash2 className="w-4 h-4" />}
-              </Button>
             </div>
          </div>
       </div>

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import OverflowTooltipText from "@/components/OverflowTooltipText";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -293,7 +294,7 @@ function AdminDashboard() {
   const projectMediaCount = (id: string) => mediaList.filter((m: MediaItem) => (m.projectId?._id || m.projectId)?.toString() === id.toString()).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden">
       <nav className="h-20 bg-white border-b border-slate-200 px-6 lg:px-12 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
@@ -368,17 +369,17 @@ function AdminDashboard() {
                     <CardHeader><CardTitle>Existing Projects</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                       {projects.map((p: ProjectItem) => (
-                        <div key={p._id} onClick={() => setActiveProjectId(p._id)} className="group flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl hover:border-primary/40 hover:shadow-lg transition-all cursor-pointer">
-                          <div className="flex items-center gap-4">
+                        <div key={p._id} onClick={() => setActiveProjectId(p._id)} className="group flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl hover:border-primary/40 hover:shadow-lg transition-all cursor-pointer gap-3 min-w-0">
+                          <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center overflow-hidden">
                               {p.thumbnailUrl ? <Image src={p.thumbnailUrl} alt={p.name} width={48} height={48} className="object-cover h-full w-full" /> : <Folder className="w-6 h-6 text-slate-400" />}
                             </div>
-                            <div>
-                               <p className="font-bold">{p.name}</p>
+                            <div className="min-w-0 flex-1">
+                               <OverflowTooltipText as="p" text={p.name} className="font-bold truncate" />
                                <p className="text-xs text-slate-400 uppercase font-bold tracking-tight">{projectMediaCount(p._id)} Items</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                          <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
                             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { setRenamingProjectId(p._id); setRenamingName(p.name); }}>
                               <Pencil className="w-4 h-4 text-slate-400" />
                             </Button>
@@ -405,9 +406,13 @@ function AdminDashboard() {
                 </motion.div>
               ) : (
                 <motion.div key="detail" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-4 min-w-0">
                     <Button variant="ghost" className="pl-0" onClick={() => setActiveProjectId(null)}>← Back to Projects</Button>
-                    <h2 className="text-2xl font-bold">{projects.find((p: ProjectItem) => p._id === activeProjectId)?.name}</h2>
+                    <OverflowTooltipText
+                      as="h2"
+                      text={projects.find((p: ProjectItem) => p._id === activeProjectId)?.name}
+                      className="text-2xl font-bold min-w-0 flex-1 text-right truncate"
+                    />
                   </div>
 
                   <Tabs defaultValue="p-photo" className="w-full">
@@ -527,7 +532,11 @@ function AdminDashboard() {
                   </Tabs>
 
                   <div className="border-t pt-8">
-                    <h3 className="text-xl font-semibold mb-6">{projects.find((p: ProjectItem)=>p._id === activeProjectId)?.name} Content</h3>
+                    <OverflowTooltipText
+                      as="h3"
+                      text={`${projects.find((p: ProjectItem)=>p._id === activeProjectId)?.name || ""} Content`}
+                      className="text-xl font-semibold mb-6 truncate"
+                    />
                     <AdminSortableMediaList key={activeProjectId || 'none'} items={mediaList.filter((m: MediaItem) => m.projectId?._id?.toString() === activeProjectId?.toString())} />
                   </div>
                 </motion.div>
@@ -539,31 +548,48 @@ function AdminDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {isLoadingMedia ? Array.from({length:8}).map((_,i)=><Skeleton key={i} className="aspect-square rounded-2xl" />) : 
                 mediaList.map((item: MediaItem) => (
-                  <Card key={item._id} className="overflow-hidden group border-muted shadow-sm hover:shadow-md transition-all relative rounded-2xl bg-white aspect-square flex flex-col">
-                    <div className="relative flex-1 bg-muted/20">
+                  <Card key={item._id} className="group border-muted shadow-sm hover:shadow-md transition-all relative rounded-2xl bg-white aspect-square flex flex-col">
+                    <div className="relative flex-1 bg-muted/20 rounded-t-2xl overflow-hidden">
+
                       <Image src={item.type === 'video' ? (item.thumbnailUrl || `https://img.youtube.com/vi/${item.url}/mqdefault.jpg`) : item.url} alt={item.title} fill className="object-cover" unoptimized/>
                       {item.type === 'video' && <PlaySquare className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white w-10 h-10 drop-shadow-md" />}
                       {item.type === 'text-image' && <FileText className="absolute top-2 left-2 text-white/50 w-5 h-5"/>}
-                      <Button 
-                        variant="destructive" 
-                        size="icon-sm" 
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                        onClick={() => {
-                          if (confirm("Permanently delete this media from library?")) {
-                            deleteMediaMutation.mutate(item._id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
                     </div>
-                    <div className="p-3 border-t">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">{item.projectId?.name || "Unassigned"}</p>
-                        <span className="text-[10px] text-slate-300 font-medium">{new Date(item.createdAt).toLocaleDateString()}</span>
+                    <div className="p-3 border-t flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <OverflowTooltipText
+                            as="p"
+                            text={item.projectId?.name || "Unassigned"}
+                            className="text-xs font-bold text-slate-400 uppercase tracking-tighter truncate"
+                          />
+                        </div>
+                        <span className="text-[10px] text-slate-300 font-medium whitespace-nowrap">{new Date(item.createdAt).toLocaleDateString()}</span>
                       </div>
-                      <p className="text-sm font-semibold truncate mt-1">{item.title}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <OverflowTooltipText 
+                            as="p" 
+                            text={item.title} 
+                            className="text-sm font-semibold truncate" 
+                          />
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-red-500 hover:bg-red-50 hover:text-red-600 h-7 w-7 shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm(`Permanently delete "${item.title}" from library?`)) {
+                              deleteMediaMutation.mutate(item._id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
+
                   </Card>
                 ))
               }
