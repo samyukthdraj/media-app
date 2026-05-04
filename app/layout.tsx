@@ -8,8 +8,32 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Media Gallery Admin",
-  description: "Upload and share photos and videos",
+  metadataBase: new URL("https://neha-sreejith.vercel.app"),
+  title: {
+    default: "Neha Sreejith | EHAS Portfolio",
+    template: "%s | Neha Sreejith",
+  },
+  description: "Professional media portfolio of Neha Sreejith (EHAS). A premium showcase of high-quality photography and videography.",
+  keywords: ["Neha Sreejith", "EHAS", "Portfolio", "Media Gallery", "Photography", "Videography", "Creative Showcase"],
+  authors: [{ name: "Neha Sreejith" }],
+  creator: "Neha Sreejith",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://neha-sreejith.vercel.app",
+    title: "Neha Sreejith | EHAS Portfolio",
+    description: "Professional media portfolio of Neha Sreejith (EHAS).",
+    siteName: "EHAS Portfolio",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Neha Sreejith | EHAS Portfolio",
+    description: "Professional media portfolio of Neha Sreejith (EHAS).",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

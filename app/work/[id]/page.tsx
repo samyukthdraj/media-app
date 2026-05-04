@@ -1,6 +1,26 @@
 import { getPublicGalleryAction } from "@/lib/actions";
 import ProjectDetailViewer from "@/components/ProjectDetailViewer";
 import { IProject, IMedia } from "@/lib/models";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
+  const res = await getPublicGalleryAction();
+  
+  if (!res.success || !res.data) return { title: "Project Not Found" };
+  
+  const project = (res.data.projects as IProject[]).find((p: IProject) => p._id === id);
+  if (!project) return { title: "Project Not Found" };
+  
+  return {
+    title: `${project.name} | Neha Sreejith`,
+    description: `View details for the project "${project.name}" by Neha Sreejith.`,
+    openGraph: {
+      images: project.thumbnailUrl ? [project.thumbnailUrl] : [],
+    },
+  };
+}
 
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;

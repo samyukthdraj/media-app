@@ -4,6 +4,12 @@ import OverflowTooltipText from "@/components/OverflowTooltipText";
 import Image from "next/image";
 import Link from "next/link";
 import { IProject } from "@/lib/models";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Work | Neha Sreejith - Creative Media Portfolio",
+  description: "Browse the creative projects and media showcases by Neha Sreejith. Featuring a curated collection of professional photography and video production.",
+};
 
 export default async function WorkPage() {
   const res = await getPublicGalleryAction();

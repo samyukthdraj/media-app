@@ -1,6 +1,12 @@
 import { Navbar, Footer } from "@/components/PublicLayout";
 import { PageTransition } from "@/components/PageTransition";
 import Image from "next/image";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Home | Neha Sreejith - EHAS Portfolio",
+  description: "Welcome to the official portfolio of Neha Sreejith (EHAS). Explore high-end visual showcases, including professional photography and videography projects.",
+};
 
 export default function Home() {
   return (
