@@ -20,15 +20,18 @@ Most portfolio templates are either too rigid or too complex to manage. **EHAS P
 This application is built on a cutting-edge, type-safe stack:
 
 ### **Core**
+
 - **Next.js 15 (App Router)**: The foundation for the entire application, utilizing Server Components for speed and Client Components for interactivity.
 - **React 19**: Utilizing the latest features of the React ecosystem for efficient rendering and state management.
 - **TypeScript**: Ensuring end-to-end type safety across the frontend and backend.
 
 ### **Backend & Storage**
+
 - **MongoDB & Mongoose**: A robust NoSQL database solution for storing media metadata, project titles, and administrative configurations.
 - **UploadThing**: A developer-first file upload service used for secure, serverless media handling and storage.
 
 ### **UI & Experience**
+
 - **Tailwind CSS v4**: Utilizing the latest iteration of Tailwind for high-performance styling with zero runtime overhead.
 - **Framer Motion**: Powering fluid page transitions and micro-animations that enhance the "premium" feel.
 - **Shadcn/UI & Radix UI**: A collection of accessible, high-quality primitive components for a polished interface.
@@ -36,6 +39,7 @@ This application is built on a cutting-edge, type-safe stack:
 - **Lucide React**: A beautiful and consistent icon set used throughout the application.
 
 ### **State & Data**
+
 - **TanStack React Query**: Used for efficient data fetching, caching, and synchronization between the client and the database.
 
 ---
@@ -44,9 +48,9 @@ This application is built on a cutting-edge, type-safe stack:
 
 - **Dynamic Gallery**: A responsive masonry or grid-style layout that adapts to various screen sizes while maintaining a professional look.
 - **Admin Command Center**: A secure route (`/admin`) allowing administrators to:
-    - Upload new photos and videos via drag-and-drop.
-    - Live-reorder media items to curate the landing page experience.
-    - Instant deletion of outdated content.
+  - Upload new photos and videos via drag-and-drop.
+  - Live-reorder media items to curate the landing page experience.
+  - Instant deletion of outdated content.
 - **Interactive Tooltips**: Graceful handling of long filenames and metadata via smart truncation and hover states.
 - **Smooth Navigation**: Custom page transitions that maintain the editorial flow as users explore the portfolio.
 - **Mobile Optimized**: Fully responsive design ensuring the portfolio looks stunning on any device.
@@ -56,18 +60,22 @@ This application is built on a cutting-edge, type-safe stack:
 ## ⚙️ Getting Started
 
 ### 1. Clone the repository
+
 ```bash
 git clone <repository-url>
 cd media-app
 ```
 
 ### 2. Install dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Environment Setup
+
 Create a `.env` file in the root directory and add the following keys:
+
 ```env
 MONGODB_URI=your_mongodb_connection_string
 UPLOADTHING_SECRET=your_uploadthing_secret
@@ -76,11 +84,12 @@ UPLOADTHING_APP_ID=your_uploadthing_app_id
 ```
 
 ### 4. Run the development server
+
 ```bash
 npm run dev
 ```
 
-The application will be available at [http://localhost:3000](http://localhost:3000).
+The application will be available at [https://neha-sreejith.vercel.app/](https://neha-sreejith.vercel.app/).
 
 ---
 
@@ -98,3 +107,8 @@ The application will be available at [http://localhost:3000](http://localhost:30
 ---
 
 Developed with precision for high-end visual showcases.
+
+<img width="1885" height="897" alt="image" src="https://github.com/user-attachments/assets/d9c744da-7018-4fa4-9153-3109f99adb42" />
+<img width="1899" height="905" alt="image" src="https://github.com/user-attachments/assets/8eac8671-b74e-451b-8e15-1924441ddef4" />
+<img width="1918" height="897" alt="image" src="https://github.com/user-attachments/assets/ca524518-c7bc-4dd9-813f-24798387306e" />
+<img width="1892" height="899" alt="image" src="https://github.com/user-attachments/assets/ac29de1a-21f3-44a6-a429-ba7d225f8d2c" />
