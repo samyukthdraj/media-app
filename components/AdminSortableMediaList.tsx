@@ -38,6 +38,7 @@ interface MediaItem {
   order?: number;
   textContent?: string;
   imageAlignment?: "left" | "right";
+  displaySize?: "half" | "full";
   projectId?: string | { _id: string };
 }
 
@@ -81,6 +82,7 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
         url: data.url || item.url,
         textContent: data.textContent !== undefined ? data.textContent : item.textContent,
         imageAlignment: data.imageAlignment || item.imageAlignment,
+        displaySize: data.displaySize || item.displaySize,
         projectId: projId
       });
     },
@@ -97,13 +99,13 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
       style={style} 
       className="group border-muted shadow-sm hover:shadow-md transition-shadow relative bg-white flex flex-col rounded-xl"
     >
-      <div className="relative aspect-video bg-muted/20 rounded-t-xl overflow-hidden">
+      <div className="relative aspect-video bg-white rounded-t-xl overflow-hidden border-b">
 
          <Image 
             src={item.type === 'video' ? (item.thumbnailUrl || `https://img.youtube.com/vi/${item.url}/mqdefault.jpg`) : item.url} 
             alt={item.title} 
             fill 
-            className="object-cover" 
+            className="object-contain p-2" 
             unoptimized
          />
          {item.type === 'video' && <PlaySquare className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white w-10 h-10 drop-shadow-md" />}
@@ -149,7 +151,23 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
          </div>
          <div className="flex items-center justify-between border-t border-muted/50 pt-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground uppercase font-semibold">{item.type}</span>
+              <span className="text-[10px] text-muted-foreground uppercase font-bold">{item.type}</span>
+              {item.type === 'image' && (
+                <div className="flex gap-1 bg-slate-50 p-0.5 rounded border">
+                   <button 
+                    onClick={() => updateMutation.mutate({ displaySize: "half" })}
+                    className={`text-[9px] px-1.5 py-0.5 rounded font-bold transition-all ${item.displaySize !== 'full' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                   >
+                    50%
+                   </button>
+                   <button 
+                    onClick={() => updateMutation.mutate({ displaySize: "full" })}
+                    className={`text-[9px] px-1.5 py-0.5 rounded font-bold transition-all ${item.displaySize === 'full' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                   >
+                    100%
+                   </button>
+                </div>
+              )}
               {item.type === 'text-image' && (
                 <div className="flex items-center gap-1 text-[10px] bg-white border rounded px-1.5 text-slate-500">
                   {item.imageAlignment === 'left' ? <AlignLeft className="w-3 h-3"/> : <AlignRight className="w-3 h-3"/>}

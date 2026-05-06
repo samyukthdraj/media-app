@@ -68,6 +68,7 @@ export async function saveMediaAction(data: {
   thumbnailUrl?: string;
   textContent?: string;
   imageAlignment?: "left" | "right";
+  displaySize?: "half" | "full";
 }) {
   try {
     await connectToDB();
@@ -91,6 +92,7 @@ export async function saveMediaAction(data: {
         thumbnailUrl: finalThumbnail,
         textContent: data.textContent,
         imageAlignment: data.imageAlignment || "left",
+        displaySize: data.displaySize || "half",
       });
     } else {
       // Create new media
@@ -106,6 +108,7 @@ export async function saveMediaAction(data: {
         fileKey: data.fileKey,
         textContent: data.textContent,
         imageAlignment: data.imageAlignment || "left",
+        displaySize: data.displaySize || "half",
         order: nextOrder,
       });
 

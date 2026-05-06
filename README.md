@@ -1,4 +1,4 @@
-# EHAS PORTFOLIO — Media Library & Showcase
+# NEHA SREEJITH PORTFOLIO — Media Library & Showcase
 
 A premium, high-performance media portfolio and administration suite built with modern web technologies. This project is designed for creators who need a sophisticated, editorial-style showcase for their visual work (photos and videos) with a powerful back-office for content management.
 
@@ -6,7 +6,7 @@ A premium, high-performance media portfolio and administration suite built with 
 
 ## ✦ Why This Project?
 
-Most portfolio templates are either too rigid or too complex to manage. **EHAS Portfolio** was built to solve this by providing:
+Most portfolio templates are either too rigid or too complex to manage. **Neha Sreejith Portfolio** was built to solve this by providing:
 
 1.  **Editorial Aesthetics**: A clean, grayscale-inspired design that lets the media speak for itself, utilizing premium typography and smooth transitions.
 2.  **Zero-Friction Management**: An integrated admin dashboard that makes uploading, deleting, and reordering media as simple as a few clicks.

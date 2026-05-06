@@ -11,16 +11,25 @@ export default function ProjectDetailViewer({ project, media }: { project: IProj
   // Sort media by order
   const sortedMedia = [...media].sort((a, b) => (a.order || 0) - (b.order || 0));
 
-  // Group images together in pairs of two for 50/50 layout
+  // Group images together in pairs of two for 50/50 layout, unless they are full-width
   const groupedBlocks = [];
   let currentImageGroup: IMedia[] = [];
 
   for (const item of sortedMedia) {
     if (item.type === "image") {
-      currentImageGroup.push(item);
-      if (currentImageGroup.length === 2) {
-        groupedBlocks.push({ type: "image-group", items: currentImageGroup });
-        currentImageGroup = [];
+      if (item.displaySize === "full") {
+        // Flush existing group first
+        if (currentImageGroup.length > 0) {
+          groupedBlocks.push({ type: "image-group", items: currentImageGroup });
+          currentImageGroup = [];
+        }
+        groupedBlocks.push({ type: "image", item });
+      } else {
+        currentImageGroup.push(item);
+        if (currentImageGroup.length === 2) {
+          groupedBlocks.push({ type: "image-group", items: currentImageGroup });
+          currentImageGroup = [];
+        }
       }
     } else {
       if (currentImageGroup.length > 0) {
@@ -57,31 +66,50 @@ export default function ProjectDetailViewer({ project, media }: { project: IProj
             if (block.type === "image-group") {
               const [img1, img2] = block.items!;
               return (
-                <div key={`img-grp-${idx}`} className="w-full px-6 lg:px-12 flex flex-row gap-4 lg:gap-12">
+                <div key={`img-grp-${idx}`} className="w-full px-6 lg:px-12 flex flex-row gap-4 lg:gap-12 items-start">
 
-                   <div className="w-1/2 aspect-4/5 lg:aspect-3/4 relative bg-slate-50 shadow-sm">
+                   <div className="w-1/2 relative bg-white shadow-sm border border-slate-100">
                       <Image 
                          src={img1.url!} 
                          alt={img1.title} 
-                         fill 
-                         className="object-cover" 
+                         width={1200}
+                         height={800}
+                         className="w-full h-auto object-contain" 
                          unoptimized
                       />
                    </div>
                    {img2 ? (
-                      <div className="w-1/2 aspect-4/5 lg:aspect-3/4 relative bg-slate-50 shadow-sm">
+                      <div className="w-1/2 relative bg-white shadow-sm border border-slate-100">
                         <Image 
                            src={img2.url!} 
                            alt={img2.title} 
-                           fill 
-                           className="object-cover" 
+                           width={1200}
+                           height={800}
+                           className="w-full h-auto object-contain" 
                            unoptimized
                         />
                       </div>
                    ) : (
-                      // Placeholder so the single image stays 50% width on left
                       <div className="w-1/2"></div>
                    )}
+                </div>
+              );
+            }
+
+            if (block.type === "image") {
+              const m: IMedia = block.item!;
+              return (
+                <div key={m._id} className="w-full px-6 lg:px-12">
+                  <div className="w-full relative bg-white shadow-sm border border-slate-100">
+                    <Image 
+                      src={m.url!} 
+                      alt={m.title} 
+                      width={2400}
+                      height={1200}
+                      className="w-full h-auto object-contain" 
+                      unoptimized
+                    />
+                  </div>
                 </div>
               );
             }
@@ -110,7 +138,7 @@ export default function ProjectDetailViewer({ project, media }: { project: IProj
                          muted
                          loop
                          playsInline
-                         className="w-full h-full absolute inset-0 object-cover"
+                         className="w-full h-full absolute inset-0 object-contain"
                        />
                     )}
                   </div>
@@ -131,14 +159,32 @@ export default function ProjectDetailViewer({ project, media }: { project: IProj
                               {m.textContent}
                            </p>
                         </div>
-                        <div className="w-1/2 h-[25vh] md:h-[50vh] lg:h-[70vh] relative bg-slate-100 shadow-md">
-                           {m.url && <Image src={m.url} alt={m.title} fill className="object-cover" unoptimized />}
+                        <div className="w-1/2 relative bg-white shadow-md border border-slate-100">
+                           {m.url && (
+                             <Image 
+                               src={m.url} 
+                               alt={m.title} 
+                               width={1200}
+                               height={1600}
+                               className="w-full h-auto object-contain" 
+                               unoptimized 
+                             />
+                           )}
                         </div>
                       </>
                    ) : (
                       <>
-                        <div className="w-1/2 h-[25vh] md:h-[50vh] lg:h-[70vh] relative bg-slate-100 shadow-md">
-                           {m.url && <Image src={m.url} alt={m.title} fill className="object-cover" unoptimized />}
+                        <div className="w-1/2 relative bg-white shadow-md border border-slate-100">
+                           {m.url && (
+                             <Image 
+                               src={m.url} 
+                               alt={m.title} 
+                               width={1200}
+                               height={1600}
+                               className="w-full h-auto object-contain" 
+                               unoptimized 
+                             />
+                           )}
                         </div>
                         <div className="w-1/2 min-w-0 flex flex-col justify-center pl-2 lg:pl-0 max-w-xl mx-auto">
                            <p className="text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium whitespace-pre-wrap wrap-anywhere">

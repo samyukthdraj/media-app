@@ -14,6 +14,7 @@ export interface IMedia {
   url?: string;
   textContent?: string;
   imageAlignment?: "left" | "right";
+  displaySize?: "half" | "full";
   thumbnailUrl?: string;
   fileKey?: string;
   projectId?: string | IProject; // Can be string ID or populated Project object
@@ -36,6 +37,7 @@ const MediaSchema = new Schema({
   url: { type: String },
   textContent: { type: String },
   imageAlignment: { type: String, enum: ["left", "right"], default: "left" },
+  displaySize: { type: String, enum: ["half", "full"], default: "half" },
   thumbnailUrl: { type: String },
   fileKey: { type: String }, // For deleting from Uploadthing
   projectId: { type: Schema.Types.ObjectId, ref: "Project" },

@@ -88,8 +88,7 @@ function AdminDashboard() {
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectThumbnail, setNewProjectThumbnail] = useState("");
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [stagedFiles, setStagedFiles] = useState<{file: File, preview: string, displaySize: "half" | "full"}[]>([]);
   const [renamingProjectId, setRenamingProjectId] = useState<string | null>(null);
   const [renamingName, setRenamingName] = useState("");
   
@@ -99,18 +98,22 @@ function AdminDashboard() {
     onClientUploadComplete: async (res) => {
       const toastId = toast.loading("Finalizing gallery...");
       try {
-        for (const file of res) {
+        for (let i = 0; i < res.length; i++) {
+          const uploadedFile = res[i];
+          // Try to match with staged metadata, though index is usually reliable here
+          const staged = stagedFiles.find(s => s.file.name === uploadedFile.name) || stagedFiles[i];
+          
           await saveMediaAction({
-            title: file.name,
+            title: uploadedFile.name,
             type: "image",
-            url: file.url,
-            fileKey: file.key,
+            url: uploadedFile.url,
+            fileKey: uploadedFile.key,
+            displaySize: staged?.displaySize || "half",
             projectId: activeProjectId || undefined,
           });
         }
         toast.success("All images published!", { id: toastId });
-        setSelectedFiles([]);
-        setPreviews([]);
+        setStagedFiles([]);
         qc.invalidateQueries({ queryKey: ["adminMedia"] });
       } catch {
         toast.error("Error saving some files", { id: toastId });
@@ -231,20 +234,26 @@ function AdminDashboard() {
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      setSelectedFiles(prev => [...prev, ...files]);
-      const newPreviews = files.map(file => URL.createObjectURL(file));
-      setPreviews(prev => [...prev, ...newPreviews]);
+      const newStaged = files.map(file => ({
+        file,
+        preview: URL.createObjectURL(file),
+        displaySize: "half" as const
+      }));
+      setStagedFiles(prev => [...prev, ...newStaged]);
     }
   };
 
   const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-    setPreviews(prev => prev.filter((_, i) => i !== index));
+    setStagedFiles(prev => {
+      const newFiles = [...prev];
+      URL.revokeObjectURL(newFiles[index].preview);
+      return newFiles.filter((_, i) => i !== index);
+    });
   };
 
   const handleUploadAll = () => {
-    if (selectedFiles.length > 0) {
-      startUpload(selectedFiles);
+    if (stagedFiles.length > 0) {
+      startUpload(stagedFiles.map(s => s.file));
     }
   };
 
@@ -301,7 +310,7 @@ function AdminDashboard() {
             <Lock className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-xl tracking-tight">EHAS Admin</h1>
+            <h1 className="font-bold text-xl tracking-tight">NEHA SREEJITH Admin</h1>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -344,11 +353,11 @@ function AdminDashboard() {
                         <Input placeholder="Project Name" value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} />
                         <div className="space-y-2">
                            <p className="text-sm font-medium text-muted-foreground">Project Thumbnail (Optional)</p>
-                           {newProjectThumbnail ? (
-                             <div className="relative w-full aspect-video rounded-xl overflow-hidden border">
-                               <Image src={newProjectThumbnail} alt="preview" fill className="object-cover" />
-                               <Button type="button" size="icon-sm" variant="destructive" className="absolute top-2 right-2" onClick={() => setNewProjectThumbnail("")}><Trash2 className="w-4 h-4"/></Button>
-                             </div>
+                            {newProjectThumbnail ? (
+                              <div className="relative w-full aspect-video rounded-xl overflow-hidden border bg-white">
+                                <Image src={newProjectThumbnail} alt="preview" fill className="object-contain p-2" />
+                                <Button type="button" size="icon-sm" variant="destructive" className="absolute top-2 right-2" onClick={() => setNewProjectThumbnail("")}><Trash2 className="w-4 h-4"/></Button>
+                              </div>
                            ) : (
                              <label className="w-full h-32 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors">
                                <span className="text-sm text-slate-500">+ Upload Thumbnail</span>
@@ -371,9 +380,9 @@ function AdminDashboard() {
                       {projects.map((p: ProjectItem) => (
                         <div key={p._id} onClick={() => setActiveProjectId(p._id)} className="group flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl hover:border-primary/40 hover:shadow-lg transition-all cursor-pointer gap-3 min-w-0">
                           <div className="flex items-center gap-4 min-w-0 flex-1">
-                            <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center overflow-hidden">
-                              {p.thumbnailUrl ? <Image src={p.thumbnailUrl} alt={p.name} width={48} height={48} className="object-cover h-full w-full" /> : <Folder className="w-6 h-6 text-slate-400" />}
-                            </div>
+                            <div className="w-12 h-12 bg-white border border-slate-100 rounded-xl flex items-center justify-center overflow-hidden">
+                               {p.thumbnailUrl ? <Image src={p.thumbnailUrl} alt={p.name} width={48} height={48} className="object-contain h-full w-full p-1" /> : <Folder className="w-6 h-6 text-slate-400" />}
+                             </div>
                             <div className="min-w-0 flex-1">
                                <OverflowTooltipText as="p" text={p.name} className="font-bold truncate" />
                                <p className="text-xs text-slate-400 uppercase font-bold tracking-tight">{projectMediaCount(p._id)} Items</p>
@@ -467,22 +476,52 @@ function AdminDashboard() {
                     </TabsContent>
 
                     <TabsContent value="p-photo">
-                      <Card className="border-0 shadow-md max-w-3xl mx-auto p-8 text-center space-y-6">
+                      <Card className="border-0 shadow-md max-w-4xl mx-auto p-8 text-center space-y-6">
                          <CardTitle>Staged Image Upload</CardTitle>
                          <label className="border-2 border-dashed py-12 rounded-2xl flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors">
                            <ImageIcon className="w-12 h-12 text-primary" />
                            <span className="font-semibold text-lg">Click to select photos</span>
                            <input type="file" multiple className="hidden" accept="image/*" onChange={handleFileSelect} />
                          </label>
-                         {previews.length > 0 && (
-                           <div className="grid grid-cols-3 gap-4">
-                             {previews.map((src, i) => (
-                               <div key={i} className="relative aspect-square border rounded-xl overflow-hidden group">
-                                 <Image src={src} alt="preview" fill className="object-cover" />
-                                 <Button variant="destructive" size="icon-sm" className="absolute top-1 right-1 opacity-0 group-hover:opacity-100" onClick={() => removeFile(i)}><X className="w-4 h-4"/></Button>
+                         {stagedFiles.length > 0 && (
+                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                             {stagedFiles.map((s, i) => (
+                               <div key={i} className="flex flex-col gap-3">
+                                 <div className="relative aspect-square border rounded-xl overflow-hidden bg-white shadow-sm">
+                                   <Image src={s.preview} alt="preview" fill className="object-contain p-2" />
+                                   <Button 
+                                     variant="destructive" 
+                                     size="icon-sm" 
+                                     className="absolute top-1 right-1 shadow-lg" 
+                                     onClick={() => removeFile(i)}
+                                   >
+                                     <X className="w-4 h-4"/>
+                                   </Button>
+                                 </div>
+                                 <div className="flex items-center justify-between px-2">
+                                   <span className="text-xs font-bold text-slate-500 uppercase">Width:</span>
+                                   <div className="flex gap-1">
+                                      <Button 
+                                        variant={s.displaySize === 'half' ? 'default' : 'outline'} 
+                                        size="sm" 
+                                        className="h-7 px-2 text-[10px]"
+                                        onClick={() => setStagedFiles(prev => prev.map((item, idx) => idx === i ? {...item, displaySize: 'half'} : item))}
+                                      >
+                                        50%
+                                      </Button>
+                                      <Button 
+                                        variant={s.displaySize === 'full' ? 'default' : 'outline'} 
+                                        size="sm" 
+                                        className="h-7 px-2 text-[10px]"
+                                        onClick={() => setStagedFiles(prev => prev.map((item, idx) => idx === i ? {...item, displaySize: 'full'} : item))}
+                                      >
+                                        100%
+                                      </Button>
+                                   </div>
+                                 </div>
                                </div>
                              ))}
-                             <Button className="col-span-full h-12" size="lg" onClick={handleUploadAll} disabled={isUploading}>{isUploading ? <Loader2 className="animate-spin mr-2"/> : <Upload className="mr-2"/>} Publish {selectedFiles.length} Photos</Button>
+                             <Button className="col-span-full h-12 mt-4" size="lg" onClick={handleUploadAll} disabled={isUploading}>{isUploading ? <Loader2 className="animate-spin mr-2"/> : <Upload className="mr-2"/>} Publish {stagedFiles.length} Photos</Button>
                            </div>
                          )}
                       </Card>
@@ -516,8 +555,8 @@ function AdminDashboard() {
                            <label className="flex items-center gap-2 cursor-pointer"><input type="radio" name="align" checked={imageAlignment==='right'} onChange={()=>setImageAlignment('right')}/> Image Left</label>
                         </div>
                         {textImageUrl ? (
-                          <div className="relative aspect-video rounded-xl overflow-hidden border mx-auto w-48">
-                            <Image src={textImageUrl} alt="section" fill className="object-cover" />
+                          <div className="relative aspect-video rounded-xl overflow-hidden border mx-auto w-48 bg-white">
+                            <Image src={textImageUrl} alt="section" fill className="object-contain p-1" />
                             <Button size="icon-sm" variant="destructive" className="absolute top-1 right-1" onClick={()=>setTextImageUrl("")}><Trash2 className="w-4 h-4"/></Button>
                           </div>
                         ) : (
@@ -549,9 +588,9 @@ function AdminDashboard() {
               {isLoadingMedia ? Array.from({length:8}).map((_,i)=><Skeleton key={i} className="aspect-square rounded-2xl" />) : 
                 mediaList.map((item: MediaItem) => (
                   <Card key={item._id} className="group border-muted shadow-sm hover:shadow-md transition-all relative rounded-2xl bg-white aspect-square flex flex-col">
-                    <div className="relative flex-1 bg-muted/20 rounded-t-2xl overflow-hidden">
+                    <div className="relative flex-1 bg-white rounded-t-2xl overflow-hidden">
 
-                      <Image src={item.type === 'video' ? (item.thumbnailUrl || `https://img.youtube.com/vi/${item.url}/mqdefault.jpg`) : item.url} alt={item.title} fill className="object-cover" unoptimized/>
+                      <Image src={item.type === 'video' ? (item.thumbnailUrl || `https://img.youtube.com/vi/${item.url}/mqdefault.jpg`) : item.url} alt={item.title} fill className="object-contain p-2" unoptimized/>
                       {item.type === 'video' && <PlaySquare className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white w-10 h-10 drop-shadow-md" />}
                       {item.type === 'text-image' && <FileText className="absolute top-2 left-2 text-white/50 w-5 h-5"/>}
                     </div>

@@ -40,7 +40,7 @@ export default async function WorkPage() {
                     src={project.thumbnailUrl} 
                     alt={project.name} 
                     fill 
-                    className="object-cover group-hover:scale-105 group-hover:opacity-90 transition-all duration-700 ease-in-out cursor-pointer"
+                    className="object-contain p-2 group-hover:scale-[1.02] group-hover:opacity-90 transition-all duration-700 ease-in-out cursor-pointer"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-slate-400 font-semibold uppercase tracking-widest text-sm bg-slate-50 group-hover:bg-slate-100 transition-colors">

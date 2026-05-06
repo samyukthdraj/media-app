@@ -13,6 +13,7 @@ interface MediaItem {
   type: "image" | "video";
   url: string;
   projectId?: string;
+  displaySize?: "half" | "full";
   thumbnailUrl?: string;
   createdAt: string;
 }
@@ -89,9 +90,28 @@ export function PublicBookViewer({
   // Remove the active video from the "book" pages so it's not duplicated
   const bookPages = activeMedia.filter((m) => m.url !== activeVideo);
 
-  // Group pages based on viewport
-  const itemsPerPage = isMobile ? 1 : 2;
-  const pageCount = Math.ceil(bookPages.length / itemsPerPage);
+  // Group pages dynamically based on viewport and item sizes
+  const spreads: MediaItem[][] = [];
+  if (isMobile) {
+    bookPages.forEach(item => spreads.push([item]));
+  } else {
+    for (let i = 0; i < bookPages.length; i++) {
+      const item = bookPages[i];
+      if (item.displaySize === "full") {
+        spreads.push([item]);
+      } else {
+        const nextItem = bookPages[i + 1];
+        if (nextItem && nextItem.displaySize !== "full") {
+          spreads.push([item, nextItem]);
+          i++;
+        } else {
+          spreads.push([item]);
+        }
+      }
+    }
+  }
+
+  const pageCount = spreads.length;
   const totalSpreads = pageCount + 1; // +1 for the final footer spread
 
   const getEmbedUrl = (url: string) => {
@@ -100,10 +120,7 @@ export function PublicBookViewer({
     return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
   };
 
-  const currentItems = bookPages.slice(
-    currentPage * itemsPerPage,
-    currentPage * itemsPerPage + itemsPerPage
-  );
+  const currentItems = spreads[currentPage] || [];
 
   const isFooterPage = currentPage >= pageCount;
 
@@ -353,7 +370,7 @@ export function PublicBookViewer({
                                <div className="w-32 h-32 mx-auto border-[3px] border-white/20 rounded-full flex items-center justify-center mb-6 overflow-hidden shadow-2xl bg-white/5 backdrop-blur-sm p-1">
                                    <Image src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Ehas&backgroundColor=transparent`} alt="Avatar" width={120} height={120} className="rounded-full" />
                                </div>
-                               <h3 className="text-3xl font-extrabold text-white mb-2 tracking-[0.2em] uppercase">EHAS</h3>
+                               <h3 className="text-3xl font-extrabold text-white mb-2 tracking-[0.2em] uppercase">NEHA SREEJITH</h3>
                                <p className="text-white/60 font-medium tracking-wide uppercase text-sm">Creative Portfolio</p>
                            </div>
                       </div>
@@ -362,7 +379,7 @@ export function PublicBookViewer({
                   <div className={`flex w-full h-full ${isMobile ? "flex-col" : "flex-row"}`}>
                       {/* Left Page (Or single mobile page) */}
                       {currentItems[0] && (
-                      <div className="flex-1 w-full h-full relative group p-4 md:p-8 flex items-center justify-center bg-[#fafafa]">
+                      <div className={`flex-1 w-full h-full relative group p-4 md:p-8 flex items-center justify-center bg-[#fafafa] ${currentItems[0].displaySize === 'full' && !isMobile ? 'col-span-2' : ''}`}>
                           {currentItems[0].type === "image" ? (
                           <div className="w-full h-full relative overflow-hidden flex items-center justify-center shadow-[0_5px_15px_rgba(0,0,0,0.08)] bg-white rounded-sm border border-slate-100 p-2 cursor-pointer" onClick={() => setSelectedImage(currentItems[0])}>
                                <Image
@@ -383,7 +400,7 @@ export function PublicBookViewer({
                                       src={currentItems[0].thumbnailUrl}
                                       alt={currentItems[0].title}
                                       fill
-                                      className="object-cover group-hover:opacity-75 transition-all duration-300"
+                                      className="object-contain p-1 group-hover:opacity-75 transition-all duration-300"
                                       unoptimized
                                   />
                               )}
@@ -402,8 +419,8 @@ export function PublicBookViewer({
                       </div>
                       )}
 
-                      {/* Right Page (Desktop only) */}
-                      {!isMobile && (
+                      {/* Right Page (Desktop only, skip if item 0 is full width) */}
+                      {!isMobile && currentItems[0]?.displaySize !== 'full' && (
                           <div className="flex-1 w-full h-full relative group p-4 md:p-8 flex items-center justify-center bg-[#fafafa]">
                              {currentItems[1] ? (
                                   <>
@@ -427,7 +444,7 @@ export function PublicBookViewer({
                                               src={currentItems[1].thumbnailUrl}
                                               alt={currentItems[1].title}
                                               fill
-                                              className="object-cover group-hover:opacity-75 transition-all duration-300"
+                                              className="object-contain p-1 group-hover:opacity-75 transition-all duration-300"
                                               unoptimized
                                           />
                                       )}

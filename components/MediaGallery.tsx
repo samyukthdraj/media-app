@@ -19,6 +19,7 @@ interface MediaItem {
   projectId?: ProjectItem;
   fileKey?: string;
   thumbnailUrl?: string;
+  displaySize?: "half" | "full";
   createdAt: string;
 }
 
@@ -41,22 +42,23 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="rounded-xl overflow-hidden border bg-card shadow-sm hover:shadow-md transition-shadow group flex flex-col"
+            className={`rounded-xl overflow-hidden border bg-card shadow-sm hover:shadow-md transition-shadow group flex flex-col ${item.displaySize === 'full' ? 'sm:col-span-2 lg:col-span-3 xl:col-span-4' : ''}`}
           >
-            <div className="relative aspect-video w-full overflow-hidden bg-muted/30">
+            <div className="relative w-full overflow-hidden bg-white border-b">
               {item.type === "image" ? (
                 <Dialog>
                   <DialogTrigger asChild>
-                    <div className="relative w-full h-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset">
+                    <div className="relative w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset">
                       <Image
                         src={item.url}
                         alt={item.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                        width={800}
+                        height={600}
+                        className="w-full h-auto object-contain group-hover:scale-[1.02] transition-transform duration-500 ease-out"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                        <ImageIcon className="text-white w-8 h-8 drop-shadow-md" />
+                      <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
+                        <ImageIcon className="text-primary w-8 h-8 drop-shadow-sm" />
                       </div>
                     </div>
                   </DialogTrigger>
@@ -74,14 +76,14 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
               ) : (
                 <Dialog>
                   <DialogTrigger asChild>
-                    <div className="relative w-full h-full cursor-pointer bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset">
+                    <div className="relative w-full aspect-video cursor-pointer bg-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset">
                       {(item.thumbnailUrl || item.type === 'video') ? (
                         <>
                           <Image
                             src={item.thumbnailUrl || `https://img.youtube.com/vi/${item.url}/mqdefault.jpg`}
                             alt={item.title}
                             fill
-                            className="object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-500 ease-out absolute inset-0"
+                            className="object-contain p-1 opacity-80 group-hover:scale-[1.02] group-hover:opacity-100 transition-all duration-500 ease-out absolute inset-0"
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             unoptimized
                           />
