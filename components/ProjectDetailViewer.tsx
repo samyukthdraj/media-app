@@ -57,6 +57,9 @@ export default function ProjectDetailViewer({ project, media, settings }: { proj
              text={project?.name}
              className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] text-slate-400 truncate"
            />
+           <p className="text-[10px] md:text-xs font-medium uppercase tracking-[0.2em] text-slate-400 mt-1">
+             Neha Sreejith
+           </p>
         </div>
 
         {/* Media Layout */}
