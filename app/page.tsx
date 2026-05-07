@@ -1,6 +1,6 @@
 import { Navbar, Footer } from "@/components/PublicLayout";
 import { PageTransition } from "@/components/PageTransition";
-import Image from "next/image";
+import HeroImage from "@/components/HeroImage";
 import { Metadata } from "next";
 import { getHomePageSettingsAction } from "@/lib/actions";
 
@@ -38,19 +38,12 @@ export default async function Home() {
             </p>
           </div>
 
-          {/* Right Side Image */}
-          <div className="w-full md:w-1/2 h-[50vh] md:h-[70vh] relative bg-slate-100 overflow-hidden shadow-md border">
-            <Image
-              src={
-                settings?.heroImageUrl ||
-                "https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?q=80&w=2000&auto=format&fit=crop"
-              }
-              alt="Hero Image"
-              fill
-              className="object-contain grayscale hover:grayscale-0 transition-all duration-1000 p-8"
-              priority
-            />
-          </div>
+          <HeroImage
+            src={
+              settings?.heroImageUrl ||
+              "https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?q=80&w=2000&auto=format&fit=crop"
+            }
+          />
         </div>
       </main>
 

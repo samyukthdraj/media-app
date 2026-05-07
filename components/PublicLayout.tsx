@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import { IHomePageSettings, ISocialLink } from "@/lib/models";
+
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -116,63 +116,70 @@ export function Footer({ settings }: { settings?: IHomePageSettings | null }) {
     {
       platform: "Behance",
       url: "https://www.behance.net/nehasreejith2",
-      displayStyle: "name",
+      displayStyle: "both",
     },
     {
       platform: "WhatsApp",
       url: "https://wa.me/919074020290",
-      displayStyle: "name",
+      displayStyle: "both",
     },
     {
       platform: "Instagram",
       url: "https://www.instagram.com/neh4xo?igsh=dHRxanR6dHBrdXhv",
-      displayStyle: "name",
+      displayStyle: "both",
     },
   ];
 
   return (
-    <footer className="w-full bg-white border-t border-slate-200 py-12 px-6 lg:px-12 mt-auto">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="text-sm font-medium text-slate-600 order-2 md:order-1 uppercase tracking-wider">
+    <footer className="w-full bg-white border-t border-slate-200 py-6 px-6 lg:px-12 mt-auto">
+      {/* Mobile: stack vertically. md+: single row */}
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        {/* Copyright — appears last on mobile */}
+        <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider text-center md:text-left order-3 md:order-1">
           © {new Date().getFullYear()} {brandName} by {name}.
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-sm font-semibold tracking-widest uppercase order-1 md:order-2">
-          <span className="text-slate-400 mr-0 md:mr-2 w-full md:w-auto text-center md:text-left">
+
+        {/* Contact + Links — appear first on mobile */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-5 order-1 md:order-2">
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 whitespace-nowrap shrink-0">
             Contact me at:
           </span>
-          {socialLinks.map((link: ISocialLink, idx: number) => {
-            const showIcon =
-              (link.displayStyle === "icon" || link.displayStyle === "both") &&
-              link.iconUrl;
-            const showName =
-              link.displayStyle === "name" ||
-              link.displayStyle === "both" ||
-              (!link.iconUrl && link.displayStyle !== "icon");
+          <div className="flex flex-wrap items-center justify-center gap-5">
+            {socialLinks.map((link: ISocialLink, idx: number) => {
+              const showIcon =
+                link.displayStyle === "icon" || link.displayStyle === "both";
+              const showName =
+                link.displayStyle === "name" ||
+                link.displayStyle === "both" ||
+                !link.displayStyle;
 
-            return (
-              <a
-                key={idx}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-primary transition-colors text-slate-800 flex items-center gap-2 group"
-                title={link.platform}
-              >
-                {showIcon && (
-                  <div className="relative w-4 h-4">
-                    <Image
-                      src={link.iconUrl!}
-                      alt={link.platform}
-                      fill
-                      className="object-contain opacity-70 group-hover:opacity-100 transition-opacity"
-                      unoptimized
-                    />
-                  </div>
-                )}
-                {showName && <span>{link.platform}</span>}
-              </a>
-            );
-          })}
+              return (
+                <a
+                  key={idx}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary transition-colors text-slate-800 flex items-center gap-1.5 group text-[10px] font-bold tracking-widest uppercase"
+                  title={link.platform}
+                >
+                  {showIcon && link.iconUrl && (
+                    <span
+                      style={{ width: 18, height: 18, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+                      className="opacity-70 group-hover:opacity-100 transition-opacity"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={link.iconUrl}
+                        alt={link.platform}
+                        style={{ width: 18, height: 18, objectFit: "contain", display: "block" }}
+                      />
+                    </span>
+                  )}
+                  {showName && <span>{link.platform}</span>}
+                </a>
+              );
+            })}
+          </div>
         </div>
       </div>
     </footer>
