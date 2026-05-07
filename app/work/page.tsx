@@ -1,4 +1,4 @@
-import { getPublicGalleryAction } from "@/lib/actions";
+import { getPublicGalleryAction, getHomePageSettingsAction } from "@/lib/actions";
 import { Navbar, Footer } from "@/components/PublicLayout";
 import OverflowTooltipText from "@/components/OverflowTooltipText";
 import Image from "next/image";
@@ -13,6 +13,8 @@ export const metadata: Metadata = {
 
 export default async function WorkPage() {
   const res = await getPublicGalleryAction();
+  const settingsRes = await getHomePageSettingsAction();
+  const settings = settingsRes.success ? settingsRes.data : null;
 
   if (!res.success || !res.data) {
     return (
@@ -26,13 +28,11 @@ export default async function WorkPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans overflow-x-hidden">
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="flex-1 w-full max-w-[1600px] mx-auto px-6 lg:px-12 py-8 lg:py-12">
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
           {(projects as IProject[]).map((project: IProject) => (
-
             <Link href={`/work/${project._id}`} key={project._id} className="group flex flex-col gap-4 min-w-0">
               <div className="w-full aspect-square md:aspect-4/3 relative bg-slate-100 overflow-hidden border border-slate-200">
                 {project.thumbnailUrl ? (
@@ -65,7 +65,7 @@ export default async function WorkPage() {
         </div>
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { getPublicGalleryAction } from "@/lib/actions";
+import { getPublicGalleryAction, getHomePageSettingsAction } from "@/lib/actions";
 import ProjectDetailViewer from "@/components/ProjectDetailViewer";
 import { IProject, IMedia } from "@/lib/models";
 import { Metadata } from "next";
@@ -27,6 +27,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   const { id } = resolvedParams;
   
   const res = await getPublicGalleryAction();
+  const settingsRes = await getHomePageSettingsAction();
+  const settings = settingsRes.success ? settingsRes.data : null;
 
   if (!res.success || !res.data) {
     return (
@@ -51,7 +53,5 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     return (matchesId && !!m.url) || (matchesId && m.type === 'text-image');
   });
 
-
-
-  return <ProjectDetailViewer project={project} media={projectMedia} />;
+  return <ProjectDetailViewer project={project} media={projectMedia} settings={settings} />;
 }

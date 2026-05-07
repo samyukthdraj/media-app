@@ -2,6 +2,7 @@ import { Navbar, Footer } from "@/components/PublicLayout";
 import { PageTransition } from "@/components/PageTransition";
 import Image from "next/image";
 import { Metadata } from "next";
+import { getHomePageSettingsAction } from "@/lib/actions";
 
 export const metadata: Metadata = {
   title: "Home | Neha Sreejith Portfolio",
@@ -9,11 +10,14 @@ export const metadata: Metadata = {
     "Welcome to the official portfolio of Neha Sreejith. Explore high-end visual showcases, including professional photography and videography projects.",
 };
 
-export default function Home() {
+export default async function Home() {
+  const settingsRes = await getHomePageSettingsAction();
+  const settings = settingsRes.success ? settingsRes.data : null;
+
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans">
       <PageTransition />
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="flex-1 w-full flex items-center py-8 lg:py-12">
         <div className="w-full max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col-reverse md:flex-row gap-8 lg:gap-16 items-center">
@@ -24,31 +28,21 @@ export default function Home() {
                 About Me
               </p>
               <h1 className="text-4xl lg:text-7xl font-bold tracking-tighter text-slate-900 leading-none">
-                NEHA SREEJITH
+                {settings?.name || "NEHA SREEJITH"}
                 <br />
               </h1>
             </div>
 
-            <p className="text-base lg:text-xl text-slate-600 font-light leading-relaxed max-w-lg">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum.
-              Pellentesque habitant morbi tristique senectus et netus et
-              malesuada fames ac turpis egestas. Donec ac odio tempor orci
-              dapibus ultrices in. Volutpat commodo sed egestas egestas
-              fringilla phasellus.
+            <p className="text-base lg:text-xl text-slate-600 font-light leading-relaxed max-w-lg whitespace-pre-wrap">
+              {settings?.bio || "Welcome to my portfolio."}
             </p>
           </div>
 
           {/* Right Side Image */}
           <div className="w-full md:w-1/2 h-[50vh] md:h-[70vh] relative bg-slate-100 overflow-hidden shadow-md border">
             <Image
-              src="https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?q=80&w=2000&auto=format&fit=crop"
-              alt="Neha Sreejith Portfolio Hero"
+              src={settings?.heroImageUrl || "https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?q=80&w=2000&auto=format&fit=crop"}
+              alt="Hero Image"
               fill
               className="object-contain grayscale hover:grayscale-0 transition-all duration-1000 p-8"
               priority
@@ -57,7 +51,7 @@ export default function Home() {
         </div>
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </div>
   );
 }

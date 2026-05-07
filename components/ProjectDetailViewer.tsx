@@ -4,9 +4,9 @@ import Image from "next/image";
 import { Navbar, Footer } from "@/components/PublicLayout";
 import OverflowTooltipText from "@/components/OverflowTooltipText";
 
-import { IProject, IMedia } from "@/lib/models";
+import { IProject, IMedia, IHomePageSettings } from "@/lib/models";
 
-export default function ProjectDetailViewer({ project, media }: { project: IProject, media: IMedia[] }) {
+export default function ProjectDetailViewer({ project, media, settings }: { project: IProject, media: IMedia[], settings?: IHomePageSettings | null }) {
 
   // Sort media by order
   const sortedMedia = [...media].sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -46,7 +46,7 @@ export default function ProjectDetailViewer({ project, media }: { project: IProj
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans overflow-x-hidden">
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="flex-1 w-full max-w-[1600px] mx-auto pb-24 pt-8 lg:pt-12">
         
@@ -208,7 +208,7 @@ export default function ProjectDetailViewer({ project, media }: { project: IProj
         </div>
       </main>
 
-      <Footer />
+      <Footer settings={settings} />
     </div>
   );
 }

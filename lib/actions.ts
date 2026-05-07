@@ -2,9 +2,51 @@
 
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { connectToDB } from "./db";
-import { Media, Project } from "./models";
+import { Media, Project, Settings, IHomePageSettings } from "./models";
 import { UTApi } from "uploadthing/server";
 import { fetchYouTubeMetadata } from "../utils/youtube";
+
+export async function getHomePageSettingsAction() {
+  try {
+    await connectToDB();
+    const settings = await Settings.findOne({ key: "homePage" });
+    if (!settings) {
+      // Return default settings if none exist
+      const defaultSettings: IHomePageSettings = {
+        name: "NEHA SREEJITH",
+        bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+        heroImageUrl: "https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?q=80&w=2000&auto=format&fit=crop",
+        socialLinks: [
+          { platform: "Behance", url: "https://www.behance.net/nehasreejith2", displayStyle: "name" },
+          { platform: "WhatsApp", url: "https://wa.me/919074020290", displayStyle: "name" },
+          { platform: "Instagram", url: "https://www.instagram.com/neh4xo?igsh=dHRxanR6dHBrdXhv", displayStyle: "name" },
+        ],
+      };
+      return { success: true, data: defaultSettings };
+    }
+    return { success: true, data: settings.value as IHomePageSettings };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return { success: false, error: "Failed to fetch settings" };
+  }
+}
+
+export async function updateHomePageSettingsAction(value: IHomePageSettings) {
+  try {
+    await connectToDB();
+    await Settings.findOneAndUpdate(
+      { key: "homePage" },
+      { key: "homePage", value },
+      { upsert: true, new: true }
+    );
+    revalidatePath("/");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return { success: false, error: "Failed to update settings" };
+  }
+}
 
 export async function createProjectAction(name: string, thumbnailUrl?: string) {
   try {

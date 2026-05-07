@@ -4,11 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { IHomePageSettings, ISocialLink } from "@/lib/models";
 
-export function Navbar() {
+export function Navbar({ settings }: { settings?: IHomePageSettings | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const isWorkPage = pathname.startsWith("/work");
+  const name = settings?.name || "Neha";
+  const firstName = name.split(" ")[0];
 
   return (
     <>
@@ -44,9 +47,9 @@ export function Navbar() {
           {/* Center: Logo */}
           <Link
             href="/"
-            className="font-extrabold text-2xl md:text-3xl tracking-[0.3em] uppercase text-slate-900 absolute left-1/2 -translate-x-1/2 z-50"
+            className="font-extrabold text-2xl md:text-3xl tracking-[0.3em] uppercase text-slate-900 absolute left-1/2 -translate-x-1/2 z-50 text-center"
           >
-            Neha
+            {firstName}
           </Link>
 
           {/* Right Side: Mobile Hamburger or Desktop Placeholder */}
@@ -77,7 +80,7 @@ export function Navbar() {
               onClick={() => setIsOpen(false)}
               className="font-extrabold text-2xl tracking-[0.2em] uppercase text-slate-900 absolute left-1/2 -translate-x-1/2"
             >
-              Neha
+              {firstName}
             </Link>
           </div>
           <div className="flex-1 flex flex-col items-center justify-center gap-12 text-2xl font-bold tracking-widest uppercase">
@@ -102,35 +105,50 @@ export function Navbar() {
   );
 }
 
-export function Footer() {
+export function Footer({ settings }: { settings?: IHomePageSettings | null }) {
+  const name = settings?.name || "NEHA SREEJITH";
+  const socialLinks: ISocialLink[] = settings?.socialLinks || [
+    { platform: "Behance", url: "https://www.behance.net/nehasreejith2", displayStyle: "name" },
+    { platform: "WhatsApp", url: "https://wa.me/919074020290", displayStyle: "name" },
+    { platform: "Instagram", url: "https://www.instagram.com/neh4xo?igsh=dHRxanR6dHBrdXhv", displayStyle: "name" },
+  ];
+
   return (
     <footer className="w-full bg-white border-t border-slate-200 py-12 px-6 lg:px-12 mt-auto">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="text-sm font-medium text-slate-600 order-2 md:order-1">
-          © {new Date().getFullYear()} NEHA SREEJITH. All rights reserved.
+        <div className="text-sm font-medium text-slate-600 order-2 md:order-1 uppercase tracking-wider">
+          © {new Date().getFullYear()} {name}. All rights reserved.
         </div>
         <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-sm font-semibold tracking-widest uppercase order-1 md:order-2">
           <span className="text-slate-400 mr-0 md:mr-2 w-full md:w-auto text-center md:text-left">
             Contact me at:
           </span>
-          <a
-            href="#"
-            className="hover:text-primary transition-colors text-slate-800"
-          >
-            Behance
-          </a>
-          <a
-            href="#"
-            className="hover:text-primary transition-colors text-slate-800"
-          >
-            WhatsApp
-          </a>
-          <a
-            href="#"
-            className="hover:text-primary transition-colors text-slate-800"
-          >
-            Instagram
-          </a>
+          {socialLinks.map((link: ISocialLink, idx: number) => {
+            const showIcon = (link.displayStyle === "icon" || link.displayStyle === "both") && link.iconUrl;
+            const showName = link.displayStyle === "name" || link.displayStyle === "both" || (!link.iconUrl && link.displayStyle !== "icon");
+
+            return (
+              <a
+                key={idx}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors text-slate-800 flex items-center gap-2 group"
+                title={link.platform}
+              >
+                {showIcon && (
+                  <img 
+                    src={link.iconUrl!} 
+                    alt={link.platform} 
+                    className="w-4 h-4 object-contain opacity-70 group-hover:opacity-100 transition-opacity" 
+                  />
+                )}
+                {showName && (
+                  <span>{link.platform}</span>
+                )}
+              </a>
+            );
+          })}
         </div>
       </div>
     </footer>

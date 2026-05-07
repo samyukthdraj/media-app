@@ -22,6 +22,26 @@ export interface IMedia {
   createdAt?: string; // Using string because of JSON.parse(JSON.stringify())
 }
 
+export interface ISettings {
+  _id: string;
+  key: string;
+  value: unknown;
+}
+
+export interface ISocialLink {
+  platform: string;
+  url: string;
+  iconUrl?: string;
+  displayStyle?: "both" | "name" | "icon";
+}
+
+export interface IHomePageSettings {
+  name: string;
+  bio: string;
+  heroImageUrl: string;
+  socialLinks: ISocialLink[];
+}
+
 const ProjectSchema = new Schema({
   name: { type: String, required: true },
   thumbnailUrl: { type: String },
@@ -47,4 +67,12 @@ const MediaSchema = new Schema({
 
 delete mongoose.models.Media;
 export const Media = model("Media", MediaSchema);
+
+const SettingsSchema = new Schema({
+  key: { type: String, required: true, unique: true },
+  value: { type: Schema.Types.Mixed, required: true },
+});
+
+delete mongoose.models.Settings;
+export const Settings = model("Settings", SettingsSchema);
 
