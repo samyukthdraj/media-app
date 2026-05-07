@@ -1173,7 +1173,7 @@ function HomeSettingsForm({ initialData }: { initialData: IHomePageSettings }) {
               <Input
                 value={hpName}
                 onChange={(e) => setHpName(e.target.value)}
-                placeholder="e.g. NEHA SREEJITH"
+                placeholder="e.g. EHAS | Neha Sreejith's Portfolio"
               />
             </div>
             <div className="space-y-2">
@@ -1307,14 +1307,20 @@ function HomeSettingsForm({ initialData }: { initialData: IHomePageSettings }) {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col sm:flex-row gap-4 items-center bg-white p-3 rounded-xl border border-slate-100">
                     <div className="flex items-center gap-4 w-full sm:w-auto">
                       {link.iconUrl ? (
                         <div className="relative w-12 h-12 rounded bg-slate-50 border overflow-hidden shrink-0">
-                          <Image src={link.iconUrl} alt="icon" fill className="object-contain p-1" unoptimized />
-                          <Button 
-                            variant="destructive" 
+                          <Image
+                            src={link.iconUrl}
+                            alt="icon"
+                            fill
+                            className="object-contain p-1"
+                            unoptimized
+                          />
+                          <Button
+                            variant="destructive"
                             className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full scale-75"
                             onClick={() => {
                               const newLinks = [...hpSocialLinks];
@@ -1328,34 +1334,50 @@ function HomeSettingsForm({ initialData }: { initialData: IHomePageSettings }) {
                       ) : (
                         <label className="w-12 h-12 flex items-center justify-center border border-dashed rounded bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors shrink-0">
                           <ImageIcon className="w-4 h-4 text-slate-400" />
-                          <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
-                            if (e.target.files?.[0]) {
-                              toast.loading("Uploading icon...", { id: `icon-${idx}` });
-                              const res = await startIconUpload([e.target.files[0]]);
-                              if (res?.[0]) {
-                                const newLinks = [...hpSocialLinks];
-                                newLinks[idx].iconUrl = res[0].url;
-                                setHpSocialLinks(newLinks);
-                                toast.success("Icon uploaded", { id: `icon-${idx}` });
-                              } else {
-                                toast.error("Upload failed", { id: `icon-${idx}` });
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              if (e.target.files?.[0]) {
+                                toast.loading("Uploading icon...", {
+                                  id: `icon-${idx}`,
+                                });
+                                const res = await startIconUpload([
+                                  e.target.files[0],
+                                ]);
+                                if (res?.[0]) {
+                                  const newLinks = [...hpSocialLinks];
+                                  newLinks[idx].iconUrl = res[0].url;
+                                  setHpSocialLinks(newLinks);
+                                  toast.success("Icon uploaded", {
+                                    id: `icon-${idx}`,
+                                  });
+                                } else {
+                                  toast.error("Upload failed", {
+                                    id: `icon-${idx}`,
+                                  });
+                                }
                               }
-                            }
-                          }} />
+                            }}
+                          />
                         </label>
                       )}
                     </div>
-                    
+
                     <div className="flex-1 space-y-1 w-full">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                         Display Style
                       </label>
-                      <select 
+                      <select
                         className="w-full h-10 px-3 border rounded-md text-sm outline-none focus:ring-2 focus:ring-primary/50 bg-transparent"
                         value={link.displayStyle || "name"}
                         onChange={(e) => {
                           const newLinks = [...hpSocialLinks];
-                          newLinks[idx].displayStyle = e.target.value as "both" | "name" | "icon";
+                          newLinks[idx].displayStyle = e.target.value as
+                            | "both"
+                            | "name"
+                            | "icon";
                           setHpSocialLinks(newLinks);
                         }}
                       >

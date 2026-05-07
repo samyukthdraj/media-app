@@ -5,9 +5,9 @@ import { Metadata } from "next";
 import { getHomePageSettingsAction } from "@/lib/actions";
 
 export const metadata: Metadata = {
-  title: "Home | Neha Sreejith Portfolio",
+  title: "EHAS | Neha Sreejith's Portfolio",
   description:
-    "Welcome to the official portfolio of Neha Sreejith. Explore high-end visual showcases, including professional photography and videography projects.",
+    "Welcome to the official portfolio of EHAS by Neha Sreejith. Explore high-end visual showcases, including professional photography and videography projects.",
 };
 
 export default async function Home() {
@@ -17,7 +17,7 @@ export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans">
       <PageTransition />
-      <Navbar settings={settings} />
+      <Navbar />
 
       <main className="flex-1 w-full flex items-center py-8 lg:py-12">
         <div className="w-full max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col-reverse md:flex-row gap-8 lg:gap-16 items-center">
@@ -28,7 +28,7 @@ export default async function Home() {
                 About Me
               </p>
               <h1 className="text-4xl lg:text-7xl font-bold tracking-tighter text-slate-900 leading-none">
-                {settings?.name || "NEHA SREEJITH"}
+                NEHA SREEJITH
                 <br />
               </h1>
             </div>
@@ -41,7 +41,10 @@ export default async function Home() {
           {/* Right Side Image */}
           <div className="w-full md:w-1/2 h-[50vh] md:h-[70vh] relative bg-slate-100 overflow-hidden shadow-md border">
             <Image
-              src={settings?.heroImageUrl || "https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?q=80&w=2000&auto=format&fit=crop"}
+              src={
+                settings?.heroImageUrl ||
+                "https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?q=80&w=2000&auto=format&fit=crop"
+              }
               alt="Hero Image"
               fill
               className="object-contain grayscale hover:grayscale-0 transition-all duration-1000 p-8"

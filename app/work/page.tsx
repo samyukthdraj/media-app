@@ -1,4 +1,7 @@
-import { getPublicGalleryAction, getHomePageSettingsAction } from "@/lib/actions";
+import {
+  getPublicGalleryAction,
+  getHomePageSettingsAction,
+} from "@/lib/actions";
 import { Navbar, Footer } from "@/components/PublicLayout";
 import OverflowTooltipText from "@/components/OverflowTooltipText";
 import Image from "next/image";
@@ -7,8 +10,9 @@ import { IProject } from "@/lib/models";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Work | Neha Sreejith - Creative Media Portfolio",
-  description: "Browse the creative projects and media showcases by Neha Sreejith. Featuring a curated collection of professional photography and video production.",
+  title: "Work | EHAS | Neha Sreejith's Portfolio",
+  description:
+    "Browse the creative projects and media showcases by EHAS by Neha Sreejith. Featuring a curated collection of professional photography and videography.",
 };
 
 export default async function WorkPage() {
@@ -28,18 +32,22 @@ export default async function WorkPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans overflow-x-hidden">
-      <Navbar settings={settings} />
+      <Navbar />
 
       <main className="flex-1 w-full max-w-[1600px] mx-auto px-6 lg:px-12 py-8 lg:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
           {(projects as IProject[]).map((project: IProject) => (
-            <Link href={`/work/${project._id}`} key={project._id} className="group flex flex-col gap-4 min-w-0">
+            <Link
+              href={`/work/${project._id}`}
+              key={project._id}
+              className="group flex flex-col gap-4 min-w-0"
+            >
               <div className="w-full aspect-square md:aspect-4/3 relative bg-slate-100 overflow-hidden border border-slate-200">
                 {project.thumbnailUrl ? (
-                  <Image 
-                    src={project.thumbnailUrl} 
-                    alt={project.name} 
-                    fill 
+                  <Image
+                    src={project.thumbnailUrl}
+                    alt={project.name}
+                    fill
                     className="object-contain p-2 group-hover:scale-[1.02] group-hover:opacity-90 transition-all duration-700 ease-in-out cursor-pointer"
                   />
                 ) : (
@@ -58,9 +66,9 @@ export default async function WorkPage() {
             </Link>
           ))}
           {projects.length === 0 && (
-             <div className="col-span-full py-24 text-center text-slate-500 font-medium tracking-wide">
-                No projects published yet.
-             </div>
+            <div className="col-span-full py-24 text-center text-slate-500 font-medium tracking-wide">
+              No projects published yet.
+            </div>
           )}
         </div>
       </main>

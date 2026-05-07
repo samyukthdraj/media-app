@@ -10,25 +10,34 @@ const geist = Geist({
 export const metadata: Metadata = {
   metadataBase: new URL("https://neha-sreejith.vercel.app"),
   title: {
-    default: "Neha Sreejith Portfolio",
-    template: "%s | Neha Sreejith",
+    default: "EHAS | Visual Portfolio",
+    template: "%s | EHAS",
   },
-  description: "Professional media portfolio of Neha Sreejith. A premium showcase of high-quality photography and videography.",
-  keywords: ["Neha Sreejith", "Portfolio", "Media Gallery", "Photography", "Videography", "Creative Showcase"],
+  description:
+    "Official brand portfolio of EHAS. A premium showcase of high-quality photography and videography by Neha Sreejith.",
+  keywords: [
+    "EHAS",
+    "Neha Sreejith",
+    "Portfolio",
+    "Media Gallery",
+    "Photography",
+    "Videography",
+    "Creative Showcase",
+  ],
   authors: [{ name: "Neha Sreejith" }],
   creator: "Neha Sreejith",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://neha-sreejith.vercel.app",
-    title: "Neha Sreejith Portfolio",
-    description: "Professional media portfolio of Neha Sreejith.",
-    siteName: "Neha Sreejith Portfolio",
+    title: "EHAS | Neha Sreejith's Portfolio",
+    description: "Official brand portfolio of EHAS by Neha Sreejith.",
+    siteName: "EHAS | Neha Sreejith",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Neha Sreejith Portfolio",
-    description: "Professional media portfolio of Neha Sreejith.",
+    title: "EHAS | Neha Sreejith's Portfolio",
+    description: "Official brand portfolio of EHAS by Neha Sreejith.",
   },
   robots: {
     index: true,

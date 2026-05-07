@@ -13,13 +13,26 @@ export async function getHomePageSettingsAction() {
     if (!settings) {
       // Return default settings if none exist
       const defaultSettings: IHomePageSettings = {
-        name: "NEHA SREEJITH",
+        name: "EHAS - Neha Sreejith's Portfolio",
         bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-        heroImageUrl: "https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?q=80&w=2000&auto=format&fit=crop",
+        heroImageUrl:
+          "https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?q=80&w=2000&auto=format&fit=crop",
         socialLinks: [
-          { platform: "Behance", url: "https://www.behance.net/nehasreejith2", displayStyle: "name" },
-          { platform: "WhatsApp", url: "https://wa.me/919074020290", displayStyle: "name" },
-          { platform: "Instagram", url: "https://www.instagram.com/neh4xo?igsh=dHRxanR6dHBrdXhv", displayStyle: "name" },
+          {
+            platform: "Behance",
+            url: "https://www.behance.net/nehasreejith2",
+            displayStyle: "name",
+          },
+          {
+            platform: "WhatsApp",
+            url: "https://wa.me/919074020290",
+            displayStyle: "name",
+          },
+          {
+            platform: "Instagram",
+            url: "https://www.instagram.com/neh4xo?igsh=dHRxanR6dHBrdXhv",
+            displayStyle: "name",
+          },
         ],
       };
       return { success: true, data: defaultSettings };
@@ -37,7 +50,7 @@ export async function updateHomePageSettingsAction(value: IHomePageSettings) {
     await Settings.findOneAndUpdate(
       { key: "homePage" },
       { key: "homePage", value },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
     revalidatePath("/");
     revalidatePath("/admin");
@@ -74,13 +87,13 @@ export async function getProjectsAction() {
 export async function deleteProjectAction(id: string) {
   try {
     await connectToDB();
-    
+
     // Also delete all media associated with this project from DB
-    // (Note: Physical file deletion from UploadThing should also be handled ideally, 
+    // (Note: Physical file deletion from UploadThing should also be handled ideally,
     // but for now we delete DB records to maintain hierarchy integrity)
     await Media.deleteMany({ projectId: id });
     await Project.findByIdAndDelete(id);
-    
+
     revalidatePath("/");
     revalidatePath("/admin");
     return { success: true };
@@ -138,7 +151,9 @@ export async function saveMediaAction(data: {
       });
     } else {
       // Create new media
-      const lastMedia = await Media.findOne({ projectId: data.projectId }).sort({ order: -1 });
+      const lastMedia = await Media.findOne({ projectId: data.projectId }).sort(
+        { order: -1 },
+      );
       const nextOrder = lastMedia ? (lastMedia.order || 0) + 1 : 0;
 
       const newMedia = new Media({
@@ -172,11 +187,16 @@ export async function getAdminMediaAction() {
   noStore();
   try {
     await connectToDB();
-    const media = await Media.find().populate("projectId").sort({ order: 1, createdAt: -1 });
+    const media = await Media.find()
+      .populate("projectId")
+      .sort({ order: 1, createdAt: -1 });
     return { success: true, data: JSON.parse(JSON.stringify(media)) };
   } catch (error) {
     console.error("Database Error:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to fetch media." };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch media.",
+    };
   }
 }
 
@@ -210,25 +230,36 @@ export async function getPublicGalleryAction() {
     await connectToDB();
     const projects = await Project.find().lean();
     const media = await Media.find().lean();
-    
+
     // Sort projects by latest media item
-    const projectsWithLatestMedia = projects.map(p => {
-      const projectMedia = media.filter(m => m.projectId?.toString() === p._id.toString());
-      const latestMedia = projectMedia.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())[0];
+    const projectsWithLatestMedia = projects.map((p) => {
+      const projectMedia = media.filter(
+        (m) => m.projectId?.toString() === p._id.toString(),
+      );
+      const latestMedia = projectMedia.sort(
+        (a, b) =>
+          new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime(),
+      )[0];
       return {
         ...p,
-        latestMediaDate: latestMedia ? latestMedia.createdAt : p.createdAt
+        latestMediaDate: latestMedia ? latestMedia.createdAt : p.createdAt,
       };
     });
 
-    const sortedProjects = projectsWithLatestMedia.sort((a, b) => new Date(b.latestMediaDate!).getTime() - new Date(a.latestMediaDate!).getTime());
+    const sortedProjects = projectsWithLatestMedia.sort(
+      (a, b) =>
+        new Date(b.latestMediaDate!).getTime() -
+        new Date(a.latestMediaDate!).getTime(),
+    );
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       data: {
         projects: JSON.parse(JSON.stringify(sortedProjects)),
-        media: JSON.parse(JSON.stringify(media.sort((a, b) => (a.order || 0) - (b.order || 0))))
-      } 
+        media: JSON.parse(
+          JSON.stringify(media.sort((a, b) => (a.order || 0) - (b.order || 0))),
+        ),
+      },
     };
   } catch (error) {
     console.error("Database Error:", error);
@@ -236,7 +267,9 @@ export async function getPublicGalleryAction() {
   }
 }
 
-export async function updateMediaOrderAction(updates: { id: string, order: number }[]) {
+export async function updateMediaOrderAction(
+  updates: { id: string; order: number }[],
+) {
   try {
     await connectToDB();
     const bulkOps = updates.map((update) => ({
@@ -255,7 +288,10 @@ export async function updateMediaOrderAction(updates: { id: string, order: numbe
   }
 }
 
-export async function updateProjectAction(id: string, updates: { name?: string, thumbnailUrl?: string }) {
+export async function updateProjectAction(
+  id: string,
+  updates: { name?: string; thumbnailUrl?: string },
+) {
   try {
     await connectToDB();
     await Project.findByIdAndUpdate(id, updates);
