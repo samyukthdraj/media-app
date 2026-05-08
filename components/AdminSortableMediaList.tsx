@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { 
   DndContext, 
@@ -288,19 +288,46 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
 export function AdminSortableMediaList({ items }: { items: MediaItem[] }) {
   const qc = useQueryClient();
   const [localItems, setLocalItems] = useState(items);
-
-  // Sync with prop when it changes (avoiding strict direct setState for lint)
-  if (JSON.stringify(items) !== JSON.stringify(localItems)) {
-    setLocalItems(items);
-  }
+  const isDraggingRef = useRef(false);
+  
+  const lastItemsStrRef = useRef(JSON.stringify(items));
 
   const updateOrderMutation = useMutation({
     mutationFn: updateMediaOrderAction,
-    onSuccess: () => {
+    onMutate: async (newUpdates) => {
+      await qc.cancelQueries({ queryKey: ["adminMedia"] });
+      const previousMedia = qc.getQueryData<{ success: boolean; data: MediaItem[] }>(["adminMedia"]);
+
+      if (previousMedia?.data) {
+        const newMediaData = previousMedia.data.map(item => {
+          const update = newUpdates.find(u => u.id === item._id);
+          return update ? { ...item, order: update.order } : item;
+        }).sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        qc.setQueryData(["adminMedia"], { ...previousMedia, data: newMediaData });
+      }
+
+      return { previousMedia };
+    },
+    onError: (err, newUpdates, context) => {
+      if (context?.previousMedia) {
+        qc.setQueryData(["adminMedia"], context.previousMedia);
+        setLocalItems(items); // Revert to current prop items
+      }
+      toast.error("Failed to save order to database");
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["adminMedia"] });
     },
-    onError: () => toast.error("Failed to save order to database")
   });
+
+  useEffect(() => {
+    const itemsStr = JSON.stringify(items);
+    if (itemsStr !== lastItemsStrRef.current) {
+      setLocalItems(items);
+      lastItemsStrRef.current = itemsStr;
+    }
+  }, [items]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -309,6 +336,7 @@ export function AdminSortableMediaList({ items }: { items: MediaItem[] }) {
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
+    isDraggingRef.current = false;
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
@@ -317,6 +345,7 @@ export function AdminSortableMediaList({ items }: { items: MediaItem[] }) {
 
       const newItems = arrayMove(localItems, oldIndex, newIndex);
       setLocalItems(newItems);
+      lastItemsStrRef.current = JSON.stringify(newItems);
 
       // Save to database
       const updates = newItems.map((item, index) => ({
@@ -336,7 +365,14 @@ export function AdminSortableMediaList({ items }: { items: MediaItem[] }) {
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext 
+      sensors={sensors} 
+      collisionDetection={closestCenter} 
+      onDragStart={() => {
+        isDraggingRef.current = true;
+      }}
+      onDragEnd={handleDragEnd}
+    >
       <SortableContext items={localItems.map(i => i._id)} strategy={rectSortingStrategy}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {localItems.map(item => (

@@ -4,6 +4,7 @@ export interface IProject {
   _id: string;
   name: string;
   thumbnailUrl?: string;
+  order?: number;
   createdAt?: string; // Using string because of JSON.parse(JSON.stringify())
 }
 
@@ -47,6 +48,7 @@ export interface IHomePageSettings {
 const ProjectSchema = new Schema({
   name: { type: String, required: true },
   thumbnailUrl: { type: String },
+  order: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
 });
 

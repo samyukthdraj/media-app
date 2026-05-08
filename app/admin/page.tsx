@@ -2,6 +2,7 @@
 
 import "@uploadthing/react/styles.css";
 import { AdminSortableMediaList } from "@/components/AdminSortableMediaList";
+import { AdminSortableProjectList } from "@/components/AdminSortableProjectList";
 import { useState, ChangeEvent } from "react";
 import Image from "next/image";
 import RichTextarea from "@/components/RichTextarea";
@@ -18,17 +19,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import OverflowTooltipText from "@/components/OverflowTooltipText";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useUploadThing } from "@/utils/uploadthing";
 import {
   saveMediaAction,
@@ -36,7 +26,6 @@ import {
   deleteMediaAction,
   createProjectAction,
   getProjectsAction,
-  deleteProjectAction,
   renameProjectAction,
   updateProjectAction,
   getHomePageSettingsAction,
@@ -55,7 +44,6 @@ import {
   Folder,
   X,
   Upload,
-  Pencil,
   FileText,
   Home,
   Plus,
@@ -127,16 +115,28 @@ function AdminDashboard() {
   const [newProjectThumbnail, setNewProjectThumbnail] = useState("");
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [stagedFiles, setStagedFiles] = useState<
-    { file: File; preview: string; displaySize: "half" | "full" | "quarter"; caption: string }[]
+    {
+      file: File;
+      preview: string;
+      displaySize: "half" | "full" | "quarter";
+      caption: string;
+    }[]
   >([]);
   // Design Process state
   const [dpStagedFiles, setDpStagedFiles] = useState<
-    { file: File; preview: string; displaySize: "half" | "full" | "quarter"; caption: string }[]
+    {
+      file: File;
+      preview: string;
+      displaySize: "half" | "full" | "quarter";
+      caption: string;
+    }[]
   >([]);
   const [dpYtUrl, setDpYtUrl] = useState("");
   const [dpVideoPreviewId, setDpVideoPreviewId] = useState("");
   const [dpTextContent, setDpTextContent] = useState("");
-  const [dpImageAlignment, setDpImageAlignment] = useState<"left" | "right">("left");
+  const [dpImageAlignment, setDpImageAlignment] = useState<"left" | "right">(
+    "left",
+  );
   const [dpTextImageUrl, setDpTextImageUrl] = useState("");
   const [renamingProjectId, setRenamingProjectId] = useState<string | null>(
     null,
@@ -227,16 +227,6 @@ function AdminDashboard() {
       } else {
         toast.error(res.error || "Failed to create project");
       }
-    },
-  });
-
-  const deleteProjectMutation = useMutation({
-    mutationFn: deleteProjectAction,
-    onSuccess: () => {
-      toast.success("Project deleted");
-      setActiveProjectId(null);
-      qc.invalidateQueries({ queryKey: ["adminProjects"] });
-      qc.invalidateQueries({ queryKey: ["adminMedia"] });
     },
   });
 
@@ -334,35 +324,38 @@ function AdminDashboard() {
   };
 
   // --- Design Process upload handlers ---
-  const { startUpload: startDpUpload, isUploading: isDpUploading } = useUploadThing("imageUploader", {
-    onClientUploadComplete: async (res) => {
-      const toastId = toast.loading("Finalizing design process...");
-      try {
-        for (let i = 0; i < res.length; i++) {
-          const uploadedFile = res[i];
-          const staged = dpStagedFiles.find((s) => s.file.name === uploadedFile.name) || dpStagedFiles[i];
-          await saveMediaAction({
-            title: uploadedFile.name,
-            type: "image",
-            url: uploadedFile.url,
-            fileKey: uploadedFile.key,
-            displaySize: staged?.displaySize || "half",
-            caption: staged?.caption || "",
-            projectId: activeProjectId || undefined,
-            isDesignProcess: true,
-          });
+  const { startUpload: startDpUpload, isUploading: isDpUploading } =
+    useUploadThing("imageUploader", {
+      onClientUploadComplete: async (res) => {
+        const toastId = toast.loading("Finalizing design process...");
+        try {
+          for (let i = 0; i < res.length; i++) {
+            const uploadedFile = res[i];
+            const staged =
+              dpStagedFiles.find((s) => s.file.name === uploadedFile.name) ||
+              dpStagedFiles[i];
+            await saveMediaAction({
+              title: uploadedFile.name,
+              type: "image",
+              url: uploadedFile.url,
+              fileKey: uploadedFile.key,
+              displaySize: staged?.displaySize || "half",
+              caption: staged?.caption || "",
+              projectId: activeProjectId || undefined,
+              isDesignProcess: true,
+            });
+          }
+          toast.success("Design process images published!", { id: toastId });
+          setDpStagedFiles([]);
+          qc.invalidateQueries({ queryKey: ["adminMedia"] });
+        } catch {
+          toast.error("Error saving some files", { id: toastId });
         }
-        toast.success("Design process images published!", { id: toastId });
-        setDpStagedFiles([]);
-        qc.invalidateQueries({ queryKey: ["adminMedia"] });
-      } catch {
-        toast.error("Error saving some files", { id: toastId });
-      }
-    },
-    onUploadError: (error: Error) => {
-      toast.error(`Upload failed: ${error.message}`);
-    },
-  });
+      },
+      onUploadError: (error: Error) => {
+        toast.error(`Upload failed: ${error.message}`);
+      },
+    });
 
   const { startUpload: startDpTiUpload } = useUploadThing("imageUploader", {
     onClientUploadComplete: (res) => {
@@ -625,88 +618,15 @@ function AdminDashboard() {
                       <CardTitle>Existing Projects</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {projects.map((p: ProjectItem) => (
-                        <div
-                          key={p._id}
-                          onClick={() => setActiveProjectId(p._id)}
-                          className="group flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl hover:border-primary/40 hover:shadow-lg transition-all cursor-pointer gap-3 min-w-0"
-                        >
-                          <div className="flex items-center gap-4 min-w-0 flex-1">
-                            <div className="w-12 h-12 bg-white border border-slate-100 rounded-xl flex items-center justify-center overflow-hidden">
-                              {p.thumbnailUrl ? (
-                                <Image
-                                  src={p.thumbnailUrl}
-                                  alt={p.name}
-                                  width={48}
-                                  height={48}
-                                  className="object-contain h-full w-full p-1"
-                                />
-                              ) : (
-                                <Folder className="w-6 h-6 text-slate-400" />
-                              )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <OverflowTooltipText
-                                as="p"
-                                text={p.name}
-                                className="font-bold truncate"
-                              />
-                              <p className="text-xs text-slate-400 uppercase font-bold tracking-tight">
-                                {projectMediaCount(p._id)} Items
-                              </p>
-                            </div>
-                          </div>
-                          <div
-                            className="flex items-center gap-2 shrink-0"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                              onClick={() => {
-                                setRenamingProjectId(p._id);
-                                setRenamingName(p.name);
-                              }}
-                            >
-                              <Pencil className="w-4 h-4 text-slate-400" />
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-8 p-0 text-red-500"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Delete Project?
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This will remove the project and all its
-                                    media.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() =>
-                                      deleteProjectMutation.mutate(p._id)
-                                    }
-                                    className="bg-red-600"
-                                  >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </div>
-                      ))}
+                      <AdminSortableProjectList
+                        projects={projects}
+                        projectMediaCount={projectMediaCount}
+                        onEdit={(id, name) => {
+                          setRenamingProjectId(id);
+                          setRenamingName(name);
+                        }}
+                        onSelect={(id) => setActiveProjectId(id)}
+                      />
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -888,7 +808,10 @@ function AdminDashboard() {
                                         setStagedFiles((prev) =>
                                           prev.map((item, idx) =>
                                             idx === i
-                                              ? { ...item, displaySize: "quarter" }
+                                              ? {
+                                                  ...item,
+                                                  displaySize: "quarter",
+                                                }
                                               : item,
                                           ),
                                         )
@@ -938,7 +861,8 @@ function AdminDashboard() {
                                     </Button>
                                   </div>
                                 </div>
-                                {(s.displaySize === "half" || s.displaySize === "quarter") && (
+                                {(s.displaySize === "half" ||
+                                  s.displaySize === "quarter") && (
                                   <RichTextarea
                                     placeholder="Add caption (optional)"
                                     value={s.caption}
@@ -1099,7 +1023,9 @@ function AdminDashboard() {
                           <TabsList className="grid w-full max-w-md grid-cols-3 bg-muted/50">
                             <TabsTrigger value="dp-photo">Photos</TabsTrigger>
                             <TabsTrigger value="dp-video">Videos</TabsTrigger>
-                            <TabsTrigger value="dp-textimage">Text-Image</TabsTrigger>
+                            <TabsTrigger value="dp-textimage">
+                              Text-Image
+                            </TabsTrigger>
                           </TabsList>
                         </div>
 
@@ -1108,28 +1034,115 @@ function AdminDashboard() {
                             <CardTitle>Design Process — Photos</CardTitle>
                             <label className="border-2 border-dashed py-12 rounded-2xl flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors">
                               <ImageIcon className="w-12 h-12 text-primary" />
-                              <span className="font-semibold text-lg">Click to select design process photos</span>
-                              <input type="file" multiple className="hidden" accept="image/*" onChange={handleDpFileSelect} />
+                              <span className="font-semibold text-lg">
+                                Click to select design process photos
+                              </span>
+                              <input
+                                type="file"
+                                multiple
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleDpFileSelect}
+                              />
                             </label>
                             {dpStagedFiles.length > 0 && (
                               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {dpStagedFiles.map((s, i) => (
                                   <div key={i} className="flex flex-col gap-3">
                                     <div className="relative aspect-square border rounded-xl overflow-hidden bg-white shadow-sm">
-                                      <Image src={s.preview} alt="preview" fill className="object-contain p-2" />
-                                      <Button variant="destructive" size="icon-sm" className="absolute top-1 right-1 shadow-lg" onClick={() => removeDpFile(i)}>
+                                      <Image
+                                        src={s.preview}
+                                        alt="preview"
+                                        fill
+                                        className="object-contain p-2"
+                                      />
+                                      <Button
+                                        variant="destructive"
+                                        size="icon-sm"
+                                        className="absolute top-1 right-1 shadow-lg"
+                                        onClick={() => removeDpFile(i)}
+                                      >
                                         <X className="w-4 h-4" />
                                       </Button>
                                     </div>
                                     <div className="flex items-center justify-between px-2">
-                                      <span className="text-xs font-bold text-slate-500 uppercase">Size:</span>
+                                      <span className="text-xs font-bold text-slate-500 uppercase">
+                                        Size:
+                                      </span>
                                       <div className="flex gap-1">
-                                        <Button variant={s.displaySize === "quarter" ? "default" : "outline"} size="sm" className="h-7 px-2 text-[10px]" onClick={() => setDpStagedFiles((prev) => prev.map((item, idx) => idx === i ? { ...item, displaySize: "quarter" } : item))}>25%</Button>
-                                        <Button variant={s.displaySize === "half" ? "default" : "outline"} size="sm" className="h-7 px-2 text-[10px]" onClick={() => setDpStagedFiles((prev) => prev.map((item, idx) => idx === i ? { ...item, displaySize: "half" } : item))}>50%</Button>
-                                        <Button variant={s.displaySize === "full" ? "default" : "outline"} size="sm" className="h-7 px-2 text-[10px]" onClick={() => setDpStagedFiles((prev) => prev.map((item, idx) => idx === i ? { ...item, displaySize: "full" } : item))}>100%</Button>
+                                        <Button
+                                          variant={
+                                            s.displaySize === "quarter"
+                                              ? "default"
+                                              : "outline"
+                                          }
+                                          size="sm"
+                                          className="h-7 px-2 text-[10px]"
+                                          onClick={() =>
+                                            setDpStagedFiles((prev) =>
+                                              prev.map((item, idx) =>
+                                                idx === i
+                                                  ? {
+                                                      ...item,
+                                                      displaySize: "quarter",
+                                                    }
+                                                  : item,
+                                              ),
+                                            )
+                                          }
+                                        >
+                                          25%
+                                        </Button>
+                                        <Button
+                                          variant={
+                                            s.displaySize === "half"
+                                              ? "default"
+                                              : "outline"
+                                          }
+                                          size="sm"
+                                          className="h-7 px-2 text-[10px]"
+                                          onClick={() =>
+                                            setDpStagedFiles((prev) =>
+                                              prev.map((item, idx) =>
+                                                idx === i
+                                                  ? {
+                                                      ...item,
+                                                      displaySize: "half",
+                                                    }
+                                                  : item,
+                                              ),
+                                            )
+                                          }
+                                        >
+                                          50%
+                                        </Button>
+                                        <Button
+                                          variant={
+                                            s.displaySize === "full"
+                                              ? "default"
+                                              : "outline"
+                                          }
+                                          size="sm"
+                                          className="h-7 px-2 text-[10px]"
+                                          onClick={() =>
+                                            setDpStagedFiles((prev) =>
+                                              prev.map((item, idx) =>
+                                                idx === i
+                                                  ? {
+                                                      ...item,
+                                                      displaySize: "full",
+                                                    }
+                                                  : item,
+                                              ),
+                                            )
+                                          }
+                                        >
+                                          100%
+                                        </Button>
                                       </div>
                                     </div>
-                                    {(s.displaySize === "half" || s.displaySize === "quarter") && (
+                                    {(s.displaySize === "half" ||
+                                      s.displaySize === "quarter") && (
                                       <RichTextarea
                                         placeholder="Add caption (optional)"
                                         value={s.caption}
@@ -1148,8 +1161,18 @@ function AdminDashboard() {
                                     )}
                                   </div>
                                 ))}
-                                <Button className="col-span-full h-12 mt-4" size="lg" onClick={handleDpUploadAll} disabled={isDpUploading}>
-                                  {isDpUploading ? <Loader2 className="animate-spin mr-2" /> : <Upload className="mr-2" />} Publish {dpStagedFiles.length} Design Photos
+                                <Button
+                                  className="col-span-full h-12 mt-4"
+                                  size="lg"
+                                  onClick={handleDpUploadAll}
+                                  disabled={isDpUploading}
+                                >
+                                  {isDpUploading ? (
+                                    <Loader2 className="animate-spin mr-2" />
+                                  ) : (
+                                    <Upload className="mr-2" />
+                                  )}{" "}
+                                  Publish {dpStagedFiles.length} Design Photos
                                 </Button>
                               </div>
                             )}
@@ -1172,13 +1195,27 @@ function AdminDashboard() {
                               }}
                               className="space-y-6"
                             >
-                              <Input placeholder="YouTube URL..." value={dpYtUrl} onChange={handleDpYtUrlChange} />
+                              <Input
+                                placeholder="YouTube URL..."
+                                value={dpYtUrl}
+                                onChange={handleDpYtUrlChange}
+                              />
                               {dpVideoPreviewId && (
                                 <div className="aspect-video rounded-xl overflow-hidden border">
-                                  <iframe src={`https://www.youtube.com/embed/${dpVideoPreviewId}`} className="w-full h-full border-0" allowFullScreen />
+                                  <iframe
+                                    src={`https://www.youtube.com/embed/${dpVideoPreviewId}`}
+                                    className="w-full h-full border-0"
+                                    allowFullScreen
+                                  />
                                 </div>
                               )}
-                              <Button type="submit" className="w-full h-12" disabled={!dpVideoPreviewId}>Link Design Process Video</Button>
+                              <Button
+                                type="submit"
+                                className="w-full h-12"
+                                disabled={!dpVideoPreviewId}
+                              >
+                                Link Design Process Video
+                              </Button>
                             </form>
                           </Card>
                         </TabsContent>
@@ -1192,23 +1229,53 @@ function AdminDashboard() {
                             />
                             <div className="flex gap-8 justify-center">
                               <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="dp-align" checked={dpImageAlignment === "left"} onChange={() => setDpImageAlignment("left")} /> Image Left
+                                <input
+                                  type="radio"
+                                  name="dp-align"
+                                  checked={dpImageAlignment === "left"}
+                                  onChange={() => setDpImageAlignment("left")}
+                                />{" "}
+                                Image Left
                               </label>
                               <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="dp-align" checked={dpImageAlignment === "right"} onChange={() => setDpImageAlignment("right")} /> Image Right
+                                <input
+                                  type="radio"
+                                  name="dp-align"
+                                  checked={dpImageAlignment === "right"}
+                                  onChange={() => setDpImageAlignment("right")}
+                                />{" "}
+                                Image Right
                               </label>
                             </div>
                             {dpTextImageUrl ? (
                               <div className="relative aspect-video rounded-xl overflow-hidden border mx-auto w-48 bg-white">
-                                <Image src={dpTextImageUrl} alt="section" fill className="object-contain p-1" />
-                                <Button size="icon-sm" variant="destructive" className="absolute top-1 right-1" onClick={() => setDpTextImageUrl("")}>
+                                <Image
+                                  src={dpTextImageUrl}
+                                  alt="section"
+                                  fill
+                                  className="object-contain p-1"
+                                />
+                                <Button
+                                  size="icon-sm"
+                                  variant="destructive"
+                                  className="absolute top-1 right-1"
+                                  onClick={() => setDpTextImageUrl("")}
+                                >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
                             ) : (
                               <label className="h-24 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors">
                                 <span>Upload Section Image</span>
-                                <input type="file" className="hidden" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) startDpTiUpload([e.target.files[0]]); }} />
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    if (e.target.files?.[0])
+                                      startDpTiUpload([e.target.files[0]]);
+                                  }}
+                                />
                               </label>
                             )}
                             <Button
@@ -1245,7 +1312,7 @@ function AdminDashboard() {
                       items={mediaList.filter(
                         (m: MediaItem) =>
                           m.projectId?._id?.toString() ===
-                          activeProjectId?.toString() && !m.isDesignProcess,
+                            activeProjectId?.toString() && !m.isDesignProcess,
                       )}
                     />
                   </div>
@@ -1261,7 +1328,8 @@ function AdminDashboard() {
                       items={mediaList.filter(
                         (m: MediaItem) =>
                           m.projectId?._id?.toString() ===
-                          activeProjectId?.toString() && m.isDesignProcess === true,
+                            activeProjectId?.toString() &&
+                          m.isDesignProcess === true,
                       )}
                     />
                   </div>

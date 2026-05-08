@@ -64,7 +64,9 @@ export async function updateHomePageSettingsAction(value: IHomePageSettings) {
 export async function createProjectAction(name: string, thumbnailUrl?: string) {
   try {
     await connectToDB();
-    const newProject = new Project({ name, thumbnailUrl });
+    const lastProject = await Project.findOne().sort({ order: -1 });
+    const nextOrder = lastProject ? (lastProject.order || 0) + 1 : 0;
+    const newProject = new Project({ name, thumbnailUrl, order: nextOrder });
     await newProject.save();
     revalidatePath("/admin");
     return { success: true, data: JSON.parse(JSON.stringify(newProject)) };
@@ -77,7 +79,7 @@ export async function createProjectAction(name: string, thumbnailUrl?: string) {
 export async function getProjectsAction() {
   try {
     await connectToDB();
-    const projects = await Project.find().sort({ createdAt: -1 });
+    const projects = await Project.find().sort({ order: 1, createdAt: -1 });
     return { success: true, data: JSON.parse(JSON.stringify(projects)) };
   } catch {
     return { success: false, error: "Failed to fetch projects" };
@@ -234,34 +236,13 @@ export async function getPublicGalleryAction() {
   noStore();
   try {
     await connectToDB();
-    const projects = await Project.find().lean();
+    const projects = await Project.find().sort({ order: 1, createdAt: -1 }).lean();
     const media = await Media.find().lean();
-
-    // Sort projects by latest media item
-    const projectsWithLatestMedia = projects.map((p) => {
-      const projectMedia = media.filter(
-        (m) => m.projectId?.toString() === p._id.toString(),
-      );
-      const latestMedia = projectMedia.sort(
-        (a, b) =>
-          new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime(),
-      )[0];
-      return {
-        ...p,
-        latestMediaDate: latestMedia ? latestMedia.createdAt : p.createdAt,
-      };
-    });
-
-    const sortedProjects = projectsWithLatestMedia.sort(
-      (a, b) =>
-        new Date(b.latestMediaDate!).getTime() -
-        new Date(a.latestMediaDate!).getTime(),
-    );
 
     return {
       success: true,
       data: {
-        projects: JSON.parse(JSON.stringify(sortedProjects)),
+        projects: JSON.parse(JSON.stringify(projects)),
         media: JSON.parse(
           JSON.stringify(media.sort((a, b) => (a.order || 0) - (b.order || 0))),
         ),
@@ -285,6 +266,27 @@ export async function updateMediaOrderAction(
       },
     }));
     await Media.bulkWrite(bulkOps);
+    revalidatePath("/");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return { success: false, error: "Failed to update order" };
+  }
+}
+
+export async function updateProjectOrderAction(
+  updates: { id: string; order: number }[],
+) {
+  try {
+    await connectToDB();
+    const bulkOps = updates.map((update) => ({
+      updateOne: {
+        filter: { _id: update.id },
+        update: { order: update.order },
+      },
+    }));
+    await Project.bulkWrite(bulkOps);
     revalidatePath("/");
     revalidatePath("/admin");
     return { success: true };
