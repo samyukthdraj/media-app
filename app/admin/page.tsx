@@ -126,11 +126,11 @@ function AdminDashboard() {
   const [newProjectThumbnail, setNewProjectThumbnail] = useState("");
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [stagedFiles, setStagedFiles] = useState<
-    { file: File; preview: string; displaySize: "half" | "full" | "quarter" }[]
+    { file: File; preview: string; displaySize: "half" | "full" | "quarter"; caption: string }[]
   >([]);
   // Design Process state
   const [dpStagedFiles, setDpStagedFiles] = useState<
-    { file: File; preview: string; displaySize: "half" | "full" | "quarter" }[]
+    { file: File; preview: string; displaySize: "half" | "full" | "quarter"; caption: string }[]
   >([]);
   const [dpYtUrl, setDpYtUrl] = useState("");
   const [dpVideoPreviewId, setDpVideoPreviewId] = useState("");
@@ -161,6 +161,7 @@ function AdminDashboard() {
             url: uploadedFile.url,
             fileKey: uploadedFile.key,
             displaySize: staged?.displaySize || "half",
+            caption: staged?.caption || "",
             projectId: activeProjectId || undefined,
             isDesignProcess: false,
           });
@@ -304,6 +305,7 @@ function AdminDashboard() {
         file,
         preview: URL.createObjectURL(file),
         displaySize: "half" as const,
+        caption: "",
       }));
       setStagedFiles((prev) => [...prev, ...newStaged]);
     }
@@ -344,6 +346,7 @@ function AdminDashboard() {
             url: uploadedFile.url,
             fileKey: uploadedFile.key,
             displaySize: staged?.displaySize || "half",
+            caption: staged?.caption || "",
             projectId: activeProjectId || undefined,
             isDesignProcess: true,
           });
@@ -396,6 +399,7 @@ function AdminDashboard() {
         file,
         preview: URL.createObjectURL(file),
         displaySize: "half" as const,
+        caption: "",
       }));
       setDpStagedFiles((prev) => [...prev, ...newStaged]);
     }
@@ -933,6 +937,23 @@ function AdminDashboard() {
                                     </Button>
                                   </div>
                                 </div>
+                                {(s.displaySize === "half" || s.displaySize === "quarter") && (
+                                  <input
+                                    type="text"
+                                    placeholder="Add caption (optional)"
+                                    className="w-full px-2 py-1 text-xs border rounded-lg focus:ring-1 ring-primary outline-none"
+                                    value={s.caption}
+                                    onChange={(e) =>
+                                      setStagedFiles((prev) =>
+                                        prev.map((item, idx) =>
+                                          idx === i
+                                            ? { ...item, caption: e.target.value }
+                                            : item,
+                                        ),
+                                      )
+                                    }
+                                  />
+                                )}
                               </div>
                             ))}
                             <Button
@@ -1108,6 +1129,23 @@ function AdminDashboard() {
                                         <Button variant={s.displaySize === "full" ? "default" : "outline"} size="sm" className="h-7 px-2 text-[10px]" onClick={() => setDpStagedFiles((prev) => prev.map((item, idx) => idx === i ? { ...item, displaySize: "full" } : item))}>100%</Button>
                                       </div>
                                     </div>
+                                    {(s.displaySize === "half" || s.displaySize === "quarter") && (
+                                      <input
+                                        type="text"
+                                        placeholder="Add caption (optional)"
+                                        className="w-full px-2 py-1 text-xs border rounded-lg focus:ring-1 ring-primary outline-none"
+                                        value={s.caption}
+                                        onChange={(e) =>
+                                          setDpStagedFiles((prev) =>
+                                            prev.map((item, idx) =>
+                                              idx === i
+                                                ? { ...item, caption: e.target.value }
+                                                : item,
+                                            ),
+                                          )
+                                        }
+                                      />
+                                    )}
                                   </div>
                                 ))}
                                 <Button className="col-span-full h-12 mt-4" size="lg" onClick={handleDpUploadAll} disabled={isDpUploading}>

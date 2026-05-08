@@ -39,6 +39,7 @@ interface MediaItem {
   textContent?: string;
   imageAlignment?: "left" | "right";
   displaySize?: "half" | "full" | "quarter";
+  caption?: string;
   isDesignProcess?: boolean;
   projectId?: string | { _id: string };
 }
@@ -47,6 +48,7 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(item.textContent || "");
   const [editAlignment, setEditAlignment] = useState(item.imageAlignment || "left");
+  const [editCaption, setEditCaption] = useState(item.caption || "");
 
   const {
     attributes,
@@ -175,6 +177,11 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
                    </button>
                 </div>
               )}
+              {item.type === 'image' && (item.displaySize === 'half' || item.displaySize === 'quarter') && (
+                <div className="flex items-center gap-1 text-[10px] bg-white border rounded px-1.5 text-slate-500 max-w-[100px] truncate" title={item.caption || 'No caption'}>
+                  {item.caption ? item.caption : <span className="italic text-slate-300">no caption</span>}
+                </div>
+              )}
               {item.type === 'text-image' && (
                 <div className="flex items-center gap-1 text-[10px] bg-white border rounded px-1.5 text-slate-500">
                   {item.imageAlignment === 'left' ? <AlignLeft className="w-3 h-3"/> : <AlignRight className="w-3 h-3"/>}
@@ -223,6 +230,38 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
                         })}
                       >
                         {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2"/> : "Save Changes"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+              {item.type === 'image' && (item.displaySize === 'half' || item.displaySize === 'quarter') && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-500 hover:text-slate-900">
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Edit Caption</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <input
+                        type="text"
+                        className="w-full p-3 border rounded-md text-sm"
+                        placeholder="Image caption (optional)"
+                        value={editCaption}
+                        onChange={(e) => setEditCaption(e.target.value)}
+                      />
+                      <Button
+                        className="w-full"
+                        disabled={updateMutation.isPending}
+                        onClick={() => updateMutation.mutate({
+                          caption: editCaption,
+                        })}
+                      >
+                        {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2"/> : "Save Caption"}
                       </Button>
                     </div>
                   </DialogContent>

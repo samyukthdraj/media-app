@@ -132,28 +132,42 @@ export default function ProjectDetailViewer({
                   <div key={`quarter-grp-${idx}`} className="w-full px-6 lg:px-12 flex flex-row gap-4 lg:gap-12 items-start">
                     <div className="w-1/2 flex flex-col gap-4 lg:gap-12">
                       {quarters.map((q) => (
-                        <div key={q._id} className="w-full relative bg-white shadow-sm border border-slate-100">
-                          <Image
-                            src={q.url!}
-                            alt={q.title}
-                            width={1200}
-                            height={400}
-                            className="w-full h-auto object-contain"
-                            unoptimized
-                          />
+                        <div key={q._id} className="w-full">
+                          <div className="w-full relative bg-white shadow-sm border border-slate-100">
+                            <Image
+                              src={q.url!}
+                              alt={q.title}
+                              width={1200}
+                              height={400}
+                              className="w-full h-auto object-contain"
+                              unoptimized
+                            />
+                          </div>
+                          {q.caption && (
+                            <p className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium" style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}>
+                              {q.caption}
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>
                     {halfPair ? (
-                      <div className="w-1/2 relative bg-white shadow-sm border border-slate-100">
-                        <Image
-                          src={halfPair.url!}
-                          alt={halfPair.title}
-                          width={1200}
-                          height={800}
-                          className="w-full h-auto object-contain"
-                          unoptimized
-                        />
+                      <div className="w-1/2">
+                        <div className="relative bg-white shadow-sm border border-slate-100">
+                          <Image
+                            src={halfPair.url!}
+                            alt={halfPair.title}
+                            width={1200}
+                            height={800}
+                            className="w-full h-auto object-contain"
+                            unoptimized
+                          />
+                        </div>
+                        {halfPair.caption && (
+                          <p className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium" style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}>
+                            {halfPair.caption}
+                          </p>
+                        )}
                       </div>
                     ) : (
                       <div className="w-1/2"></div>
@@ -166,26 +180,40 @@ export default function ProjectDetailViewer({
                 const [img1, img2] = block.items!;
                 return (
                   <div key={`img-grp-${idx}`} className="w-full px-6 lg:px-12 flex flex-row gap-4 lg:gap-12 items-start">
-                     <div className="w-1/2 relative bg-white shadow-sm border border-slate-100">
-                        <Image 
-                           src={img1.url!} 
-                           alt={img1.title} 
-                           width={1200}
-                           height={800}
-                           className="w-full h-auto object-contain" 
-                           unoptimized
-                        />
-                     </div>
-                     {img2 ? (
-                        <div className="w-1/2 relative bg-white shadow-sm border border-slate-100">
+                     <div className="w-1/2">
+                        <div className="relative bg-white shadow-sm border border-slate-100">
                           <Image 
-                             src={img2.url!} 
-                             alt={img2.title} 
+                             src={img1.url!} 
+                             alt={img1.title} 
                              width={1200}
                              height={800}
                              className="w-full h-auto object-contain" 
                              unoptimized
                           />
+                        </div>
+                        {img1.caption && (
+                          <p className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium" style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}>
+                            {img1.caption}
+                          </p>
+                        )}
+                     </div>
+                     {img2 ? (
+                        <div className="w-1/2">
+                          <div className="relative bg-white shadow-sm border border-slate-100">
+                            <Image 
+                               src={img2.url!} 
+                               alt={img2.title} 
+                               width={1200}
+                               height={800}
+                               className="w-full h-auto object-contain" 
+                               unoptimized
+                            />
+                          </div>
+                          {img2.caption && (
+                            <p className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium" style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}>
+                              {img2.caption}
+                            </p>
+                          )}
                         </div>
                      ) : (
                         <div className="w-1/2"></div>
