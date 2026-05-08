@@ -4,6 +4,7 @@ import "@uploadthing/react/styles.css";
 import { AdminSortableMediaList } from "@/components/AdminSortableMediaList";
 import { useState, ChangeEvent } from "react";
 import Image from "next/image";
+import RichTextarea from "@/components/RichTextarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -938,20 +939,20 @@ function AdminDashboard() {
                                   </div>
                                 </div>
                                 {(s.displaySize === "half" || s.displaySize === "quarter") && (
-                                  <input
-                                    type="text"
+                                  <RichTextarea
                                     placeholder="Add caption (optional)"
-                                    className="w-full px-2 py-1 text-xs border rounded-lg focus:ring-1 ring-primary outline-none"
                                     value={s.caption}
-                                    onChange={(e) =>
+                                    onChange={(val) =>
                                       setStagedFiles((prev) =>
                                         prev.map((item, idx) =>
                                           idx === i
-                                            ? { ...item, caption: e.target.value }
+                                            ? { ...item, caption: val }
                                             : item,
                                         ),
                                       )
                                     }
+                                    rows={2}
+                                    className="text-xs"
                                   />
                                 )}
                               </div>
@@ -1016,11 +1017,10 @@ function AdminDashboard() {
 
                     <TabsContent value="p-textimage">
                       <Card className="border-0 shadow-md max-w-2xl mx-auto p-8 space-y-6">
-                        <textarea
-                          className="w-full h-32 p-4 border rounded-xl focus:ring-2 ring-primary outline-none"
+                        <RichTextarea
                           placeholder="Text content..."
                           value={textContent}
-                          onChange={(e) => setTextContent(e.target.value)}
+                          onChange={(val) => setTextContent(val)}
                         />
                         <div className="flex gap-8 justify-center">
                           <label className="flex items-center gap-2 cursor-pointer">
@@ -1130,20 +1130,20 @@ function AdminDashboard() {
                                       </div>
                                     </div>
                                     {(s.displaySize === "half" || s.displaySize === "quarter") && (
-                                      <input
-                                        type="text"
+                                      <RichTextarea
                                         placeholder="Add caption (optional)"
-                                        className="w-full px-2 py-1 text-xs border rounded-lg focus:ring-1 ring-primary outline-none"
                                         value={s.caption}
-                                        onChange={(e) =>
+                                        onChange={(val) =>
                                           setDpStagedFiles((prev) =>
                                             prev.map((item, idx) =>
                                               idx === i
-                                                ? { ...item, caption: e.target.value }
+                                                ? { ...item, caption: val }
                                                 : item,
                                             ),
                                           )
                                         }
+                                        rows={2}
+                                        className="text-xs"
                                       />
                                     )}
                                   </div>
@@ -1185,11 +1185,10 @@ function AdminDashboard() {
 
                         <TabsContent value="dp-textimage">
                           <Card className="border-0 shadow-md max-w-2xl mx-auto p-8 space-y-6">
-                            <textarea
-                              className="w-full h-32 p-4 border rounded-xl focus:ring-2 ring-primary outline-none"
+                            <RichTextarea
                               placeholder="Design process text..."
                               value={dpTextContent}
-                              onChange={(e) => setDpTextContent(e.target.value)}
+                              onChange={(val) => setDpTextContent(val)}
                             />
                             <div className="flex gap-8 justify-center">
                               <label className="flex items-center gap-2 cursor-pointer">

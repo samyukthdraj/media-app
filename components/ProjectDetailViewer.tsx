@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Navbar, Footer } from "@/components/PublicLayout";
 import OverflowTooltipText from "@/components/OverflowTooltipText";
 import { motion, AnimatePresence } from "framer-motion";
+import RichTextRenderer from "@/components/RichTextRenderer";
 
 import { IProject, IMedia, IHomePageSettings } from "@/lib/models";
 
@@ -144,9 +145,10 @@ export default function ProjectDetailViewer({
                             />
                           </div>
                           {q.caption && (
-                            <p className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium" style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}>
-                              {q.caption}
-                            </p>
+                            <RichTextRenderer
+                              content={q.caption}
+                              className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium space-y-1"
+                            />
                           )}
                         </div>
                       ))}
@@ -164,9 +166,10 @@ export default function ProjectDetailViewer({
                           />
                         </div>
                         {halfPair.caption && (
-                          <p className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium" style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}>
-                            {halfPair.caption}
-                          </p>
+                          <RichTextRenderer
+                            content={halfPair.caption}
+                            className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium space-y-1"
+                          />
                         )}
                       </div>
                     ) : (
@@ -192,9 +195,10 @@ export default function ProjectDetailViewer({
                           />
                         </div>
                         {img1.caption && (
-                          <p className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium" style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}>
-                            {img1.caption}
-                          </p>
+                          <RichTextRenderer
+                            content={img1.caption}
+                            className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium space-y-1"
+                          />
                         )}
                      </div>
                      {img2 ? (
@@ -210,9 +214,10 @@ export default function ProjectDetailViewer({
                             />
                           </div>
                           {img2.caption && (
-                            <p className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium" style={{ overflowWrap: 'break-word', wordBreak: 'normal' }}>
-                              {img2.caption}
-                            </p>
+                            <RichTextRenderer
+                              content={img2.caption}
+                              className="mt-2 text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium space-y-1"
+                            />
                           )}
                         </div>
                      ) : (
@@ -293,17 +298,19 @@ export default function ProjectDetailViewer({
                              )}
                           </div>
                           <div className="w-1/2 min-w-0 flex flex-col justify-center pl-2 lg:pl-0 max-w-xl mx-auto">
-                             <p className="text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium whitespace-pre-wrap wrap-anywhere">
-                                {m.textContent}
-                             </p>
+                             <RichTextRenderer
+                               content={m.textContent || ""}
+                               className="text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium space-y-2"
+                             />
                           </div>
                         </>
                      ) : (
                         <>
                           <div className="w-1/2 min-w-0 flex flex-col justify-center pr-2 lg:pr-0 max-w-xl mx-auto">
-                             <p className="text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium whitespace-pre-wrap wrap-anywhere">
-                                {m.textContent}
-                             </p>
+                             <RichTextRenderer
+                               content={m.textContent || ""}
+                               className="text-[11px] md:text-sm lg:text-xl text-slate-700 leading-snug lg:leading-relaxed font-medium space-y-2"
+                             />
                           </div>
                           <div className="w-1/2 relative bg-white shadow-md border border-slate-100">
                              {m.url && (

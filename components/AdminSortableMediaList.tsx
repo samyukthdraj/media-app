@@ -28,6 +28,7 @@ import { useMutation, useQueryClient, QueryClient } from "@tanstack/react-query"
 import { updateMediaOrderAction, deleteMediaAction, saveMediaAction } from "@/lib/actions";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import RichTextarea from "@/components/RichTextarea";
 
 interface MediaItem {
   _id: string;
@@ -208,10 +209,11 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
                       <DialogTitle>Edit Text-Image Content</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                      <textarea 
-                        className="w-full h-32 p-3 border rounded-md text-sm"
+                      <RichTextarea
                         value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
+                        onChange={(val) => setEditText(val)}
+                        placeholder="Text content..."
+                        rows={4}
                       />
                       <div className="flex gap-4 items-center justify-center">
                         <label className="flex items-center gap-2 cursor-pointer text-sm">
@@ -259,13 +261,11 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
                         updateMutation.mutate({ caption: editCaption });
                       }}
                     >
-                      <input
-                        type="text"
-                        className="w-full p-3 border rounded-md text-sm"
-                        placeholder="Image caption (optional)"
+                      <RichTextarea
                         value={editCaption}
-                        onChange={(e) => setEditCaption(e.target.value)}
-                        autoFocus
+                        onChange={(val) => setEditCaption(val)}
+                        placeholder="Image caption (optional)"
+                        rows={3}
                       />
                       <Button
                         type="submit"
