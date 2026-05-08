@@ -46,6 +46,7 @@ interface MediaItem {
 
 function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isCaptionEditing, setIsCaptionEditing] = useState(false);
   const [editText, setEditText] = useState(item.textContent || "");
   const [editAlignment, setEditAlignment] = useState(item.imageAlignment || "left");
   const [editCaption, setEditCaption] = useState(item.caption || "");
@@ -86,13 +87,18 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
         textContent: data.textContent !== undefined ? data.textContent : item.textContent,
         imageAlignment: data.imageAlignment || item.imageAlignment,
         displaySize: data.displaySize || item.displaySize,
+        caption: data.caption !== undefined ? data.caption : item.caption,
         projectId: projId
       });
     },
     onSuccess: () => {
       toast.success("Updated successfully");
       setIsEditing(false);
+      setIsCaptionEditing(false);
       qc.invalidateQueries({ queryKey: ["adminMedia"] });
+    },
+    onError: () => {
+      toast.error("Failed to update");
     }
   });
 
@@ -236,7 +242,7 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
                 </Dialog>
               )}
               {item.type === 'image' && (item.displaySize === 'half' || item.displaySize === 'quarter') && (
-                <Dialog>
+                <Dialog open={isCaptionEditing} onOpenChange={setIsCaptionEditing}>
                   <DialogTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-500 hover:text-slate-900">
                       <Pencil className="w-4 h-4" />
@@ -246,24 +252,29 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
                     <DialogHeader>
                       <DialogTitle>Edit Caption</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
+                    <form
+                      className="space-y-4 py-4"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        updateMutation.mutate({ caption: editCaption });
+                      }}
+                    >
                       <input
                         type="text"
                         className="w-full p-3 border rounded-md text-sm"
                         placeholder="Image caption (optional)"
                         value={editCaption}
                         onChange={(e) => setEditCaption(e.target.value)}
+                        autoFocus
                       />
                       <Button
+                        type="submit"
                         className="w-full"
                         disabled={updateMutation.isPending}
-                        onClick={() => updateMutation.mutate({
-                          caption: editCaption,
-                        })}
                       >
                         {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2"/> : "Save Caption"}
                       </Button>
-                    </div>
+                    </form>
                   </DialogContent>
                 </Dialog>
               )}
