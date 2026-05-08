@@ -123,7 +123,8 @@ export async function saveMediaAction(data: {
   thumbnailUrl?: string;
   textContent?: string;
   imageAlignment?: "left" | "right";
-  displaySize?: "half" | "full";
+  displaySize?: "half" | "full" | "quarter";
+  isDesignProcess?: boolean;
 }) {
   try {
     await connectToDB();
@@ -148,6 +149,7 @@ export async function saveMediaAction(data: {
         textContent: data.textContent,
         imageAlignment: data.imageAlignment || "left",
         displaySize: data.displaySize || "half",
+        isDesignProcess: data.isDesignProcess || false,
       });
     } else {
       // Create new media
@@ -166,6 +168,7 @@ export async function saveMediaAction(data: {
         textContent: data.textContent,
         imageAlignment: data.imageAlignment || "left",
         displaySize: data.displaySize || "half",
+        isDesignProcess: data.isDesignProcess || false,
         order: nextOrder,
       });
 

@@ -14,10 +14,11 @@ export interface IMedia {
   url?: string;
   textContent?: string;
   imageAlignment?: "left" | "right";
-  displaySize?: "half" | "full";
+  displaySize?: "half" | "full" | "quarter";
   thumbnailUrl?: string;
   fileKey?: string;
   projectId?: string | IProject; // Can be string ID or populated Project object
+  isDesignProcess?: boolean;
   order?: number;
   createdAt?: string; // Using string because of JSON.parse(JSON.stringify())
 }
@@ -57,10 +58,11 @@ const MediaSchema = new Schema({
   url: { type: String },
   textContent: { type: String },
   imageAlignment: { type: String, enum: ["left", "right"], default: "left" },
-  displaySize: { type: String, enum: ["half", "full"], default: "half" },
+  displaySize: { type: String, enum: ["half", "full", "quarter"], default: "half" },
   thumbnailUrl: { type: String },
   fileKey: { type: String }, // For deleting from Uploadthing
   projectId: { type: Schema.Types.ObjectId, ref: "Project" },
+  isDesignProcess: { type: Boolean, default: false },
   order: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
 });

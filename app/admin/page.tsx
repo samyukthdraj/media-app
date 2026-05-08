@@ -87,6 +87,8 @@ interface MediaItem {
   projectId?: ProjectItem;
   fileKey?: string;
   thumbnailUrl?: string;
+  displaySize?: "half" | "full" | "quarter";
+  isDesignProcess?: boolean;
   createdAt: string;
 }
 
@@ -124,8 +126,17 @@ function AdminDashboard() {
   const [newProjectThumbnail, setNewProjectThumbnail] = useState("");
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [stagedFiles, setStagedFiles] = useState<
-    { file: File; preview: string; displaySize: "half" | "full" }[]
+    { file: File; preview: string; displaySize: "half" | "full" | "quarter" }[]
   >([]);
+  // Design Process state
+  const [dpStagedFiles, setDpStagedFiles] = useState<
+    { file: File; preview: string; displaySize: "half" | "full" | "quarter" }[]
+  >([]);
+  const [dpYtUrl, setDpYtUrl] = useState("");
+  const [dpVideoPreviewId, setDpVideoPreviewId] = useState("");
+  const [dpTextContent, setDpTextContent] = useState("");
+  const [dpImageAlignment, setDpImageAlignment] = useState<"left" | "right">("left");
+  const [dpTextImageUrl, setDpTextImageUrl] = useState("");
   const [renamingProjectId, setRenamingProjectId] = useState<string | null>(
     null,
   );
@@ -151,6 +162,7 @@ function AdminDashboard() {
             fileKey: uploadedFile.key,
             displaySize: staged?.displaySize || "half",
             projectId: activeProjectId || undefined,
+            isDesignProcess: false,
           });
         }
         toast.success("All images published!", { id: toastId });
@@ -316,6 +328,98 @@ function AdminDashboard() {
     setYtUrl(url);
     const id = getYouTubeID(url);
     setVideoPreviewId(id || "");
+  };
+
+  // --- Design Process upload handlers ---
+  const { startUpload: startDpUpload, isUploading: isDpUploading } = useUploadThing("imageUploader", {
+    onClientUploadComplete: async (res) => {
+      const toastId = toast.loading("Finalizing design process...");
+      try {
+        for (let i = 0; i < res.length; i++) {
+          const uploadedFile = res[i];
+          const staged = dpStagedFiles.find((s) => s.file.name === uploadedFile.name) || dpStagedFiles[i];
+          await saveMediaAction({
+            title: uploadedFile.name,
+            type: "image",
+            url: uploadedFile.url,
+            fileKey: uploadedFile.key,
+            displaySize: staged?.displaySize || "half",
+            projectId: activeProjectId || undefined,
+            isDesignProcess: true,
+          });
+        }
+        toast.success("Design process images published!", { id: toastId });
+        setDpStagedFiles([]);
+        qc.invalidateQueries({ queryKey: ["adminMedia"] });
+      } catch {
+        toast.error("Error saving some files", { id: toastId });
+      }
+    },
+    onUploadError: (error: Error) => {
+      toast.error(`Upload failed: ${error.message}`);
+    },
+  });
+
+  const { startUpload: startDpTiUpload } = useUploadThing("imageUploader", {
+    onClientUploadComplete: (res) => {
+      if (res && res[0]) {
+        setDpTextImageUrl(res[0].url);
+        toast.success("Design process section image uploaded");
+      }
+    },
+  });
+
+  const saveDpVideoMutation = useMutation({
+    mutationFn: saveMediaAction,
+    onSuccess: () => {
+      toast.success("Design process video added!");
+      setDpYtUrl("");
+      setDpVideoPreviewId("");
+      qc.invalidateQueries({ queryKey: ["adminMedia"] });
+    },
+  });
+
+  const saveDpTextImageMutation = useMutation({
+    mutationFn: saveMediaAction,
+    onSuccess: () => {
+      toast.success("Design process section added!");
+      setDpTextContent("");
+      setDpTextImageUrl("");
+      qc.invalidateQueries({ queryKey: ["adminMedia"] });
+    },
+  });
+
+  const handleDpFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      const newStaged = files.map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+        displaySize: "half" as const,
+      }));
+      setDpStagedFiles((prev) => [...prev, ...newStaged]);
+    }
+  };
+
+  const removeDpFile = (index: number) => {
+    setDpStagedFiles((prev) => {
+      const newFiles = [...prev];
+      URL.revokeObjectURL(newFiles[index].preview);
+      return newFiles.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleDpUploadAll = () => {
+    if (dpStagedFiles.length > 0) {
+      startDpUpload(dpStagedFiles.map((s) => s.file));
+    }
+  };
+
+  const handleDpYtUrlChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setDpYtUrl(url);
+    const id = getYouTubeID(url);
+    setDpVideoPreviewId(id || "");
   };
 
   if (!authorized) {
@@ -629,12 +733,15 @@ function AdminDashboard() {
 
                   <Tabs defaultValue="p-photo" className="w-full">
                     <div className="flex justify-center mb-6">
-                      <TabsList className="grid w-full max-w-xl grid-cols-4 bg-muted/50">
+                      <TabsList className="grid w-full max-w-2xl grid-cols-5 bg-muted/50">
                         <TabsTrigger value="p-thumbnail">Thumbnail</TabsTrigger>
                         <TabsTrigger value="p-photo">Photos</TabsTrigger>
                         <TabsTrigger value="p-video">Videos</TabsTrigger>
                         <TabsTrigger value="p-textimage">
                           Text-Image
+                        </TabsTrigger>
+                        <TabsTrigger value="p-designprocess">
+                          Design Process
                         </TabsTrigger>
                       </TabsList>
                     </div>
@@ -766,6 +873,26 @@ function AdminDashboard() {
                                   <div className="flex gap-1">
                                     <Button
                                       variant={
+                                        s.displaySize === "quarter"
+                                          ? "default"
+                                          : "outline"
+                                      }
+                                      size="sm"
+                                      className="h-7 px-2 text-[10px]"
+                                      onClick={() =>
+                                        setStagedFiles((prev) =>
+                                          prev.map((item, idx) =>
+                                            idx === i
+                                              ? { ...item, displaySize: "quarter" }
+                                              : item,
+                                          ),
+                                        )
+                                      }
+                                    >
+                                      25%
+                                    </Button>
+                                    <Button
+                                      variant={
                                         s.displaySize === "half"
                                           ? "default"
                                           : "outline"
@@ -882,7 +1009,7 @@ function AdminDashboard() {
                               checked={imageAlignment === "left"}
                               onChange={() => setImageAlignment("left")}
                             />{" "}
-                            Text Left
+                            Image Left
                           </label>
                           <label className="flex items-center gap-2 cursor-pointer">
                             <input
@@ -891,7 +1018,7 @@ function AdminDashboard() {
                               checked={imageAlignment === "right"}
                               onChange={() => setImageAlignment("right")}
                             />{" "}
-                            Image Left
+                            Image Right
                           </label>
                         </div>
                         {textImageUrl ? (
@@ -943,6 +1070,131 @@ function AdminDashboard() {
                         </Button>
                       </Card>
                     </TabsContent>
+
+                    {/* Design Process Tab */}
+                    <TabsContent value="p-designprocess">
+                      <Tabs defaultValue="dp-photo" className="w-full">
+                        <div className="flex justify-center mb-6">
+                          <TabsList className="grid w-full max-w-md grid-cols-3 bg-muted/50">
+                            <TabsTrigger value="dp-photo">Photos</TabsTrigger>
+                            <TabsTrigger value="dp-video">Videos</TabsTrigger>
+                            <TabsTrigger value="dp-textimage">Text-Image</TabsTrigger>
+                          </TabsList>
+                        </div>
+
+                        <TabsContent value="dp-photo">
+                          <Card className="border-0 shadow-md max-w-4xl mx-auto p-8 text-center space-y-6">
+                            <CardTitle>Design Process — Photos</CardTitle>
+                            <label className="border-2 border-dashed py-12 rounded-2xl flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors">
+                              <ImageIcon className="w-12 h-12 text-primary" />
+                              <span className="font-semibold text-lg">Click to select design process photos</span>
+                              <input type="file" multiple className="hidden" accept="image/*" onChange={handleDpFileSelect} />
+                            </label>
+                            {dpStagedFiles.length > 0 && (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {dpStagedFiles.map((s, i) => (
+                                  <div key={i} className="flex flex-col gap-3">
+                                    <div className="relative aspect-square border rounded-xl overflow-hidden bg-white shadow-sm">
+                                      <Image src={s.preview} alt="preview" fill className="object-contain p-2" />
+                                      <Button variant="destructive" size="icon-sm" className="absolute top-1 right-1 shadow-lg" onClick={() => removeDpFile(i)}>
+                                        <X className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                    <div className="flex items-center justify-between px-2">
+                                      <span className="text-xs font-bold text-slate-500 uppercase">Size:</span>
+                                      <div className="flex gap-1">
+                                        <Button variant={s.displaySize === "quarter" ? "default" : "outline"} size="sm" className="h-7 px-2 text-[10px]" onClick={() => setDpStagedFiles((prev) => prev.map((item, idx) => idx === i ? { ...item, displaySize: "quarter" } : item))}>25%</Button>
+                                        <Button variant={s.displaySize === "half" ? "default" : "outline"} size="sm" className="h-7 px-2 text-[10px]" onClick={() => setDpStagedFiles((prev) => prev.map((item, idx) => idx === i ? { ...item, displaySize: "half" } : item))}>50%</Button>
+                                        <Button variant={s.displaySize === "full" ? "default" : "outline"} size="sm" className="h-7 px-2 text-[10px]" onClick={() => setDpStagedFiles((prev) => prev.map((item, idx) => idx === i ? { ...item, displaySize: "full" } : item))}>100%</Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                                <Button className="col-span-full h-12 mt-4" size="lg" onClick={handleDpUploadAll} disabled={isDpUploading}>
+                                  {isDpUploading ? <Loader2 className="animate-spin mr-2" /> : <Upload className="mr-2" />} Publish {dpStagedFiles.length} Design Photos
+                                </Button>
+                              </div>
+                            )}
+                          </Card>
+                        </TabsContent>
+
+                        <TabsContent value="dp-video">
+                          <Card className="border-0 shadow-md max-w-2xl mx-auto p-8">
+                            <form
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                if (dpVideoPreviewId)
+                                  saveDpVideoMutation.mutate({
+                                    title: "DP Video " + Date.now(),
+                                    type: "video",
+                                    url: dpVideoPreviewId,
+                                    projectId: activeProjectId!,
+                                    isDesignProcess: true,
+                                  });
+                              }}
+                              className="space-y-6"
+                            >
+                              <Input placeholder="YouTube URL..." value={dpYtUrl} onChange={handleDpYtUrlChange} />
+                              {dpVideoPreviewId && (
+                                <div className="aspect-video rounded-xl overflow-hidden border">
+                                  <iframe src={`https://www.youtube.com/embed/${dpVideoPreviewId}`} className="w-full h-full border-0" allowFullScreen />
+                                </div>
+                              )}
+                              <Button type="submit" className="w-full h-12" disabled={!dpVideoPreviewId}>Link Design Process Video</Button>
+                            </form>
+                          </Card>
+                        </TabsContent>
+
+                        <TabsContent value="dp-textimage">
+                          <Card className="border-0 shadow-md max-w-2xl mx-auto p-8 space-y-6">
+                            <textarea
+                              className="w-full h-32 p-4 border rounded-xl focus:ring-2 ring-primary outline-none"
+                              placeholder="Design process text..."
+                              value={dpTextContent}
+                              onChange={(e) => setDpTextContent(e.target.value)}
+                            />
+                            <div className="flex gap-8 justify-center">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="dp-align" checked={dpImageAlignment === "left"} onChange={() => setDpImageAlignment("left")} /> Image Left
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="dp-align" checked={dpImageAlignment === "right"} onChange={() => setDpImageAlignment("right")} /> Image Right
+                              </label>
+                            </div>
+                            {dpTextImageUrl ? (
+                              <div className="relative aspect-video rounded-xl overflow-hidden border mx-auto w-48 bg-white">
+                                <Image src={dpTextImageUrl} alt="section" fill className="object-contain p-1" />
+                                <Button size="icon-sm" variant="destructive" className="absolute top-1 right-1" onClick={() => setDpTextImageUrl("")}>
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <label className="h-24 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors">
+                                <span>Upload Section Image</span>
+                                <input type="file" className="hidden" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) startDpTiUpload([e.target.files[0]]); }} />
+                              </label>
+                            )}
+                            <Button
+                              className="w-full h-12"
+                              disabled={!dpTextContent || !dpTextImageUrl}
+                              onClick={() =>
+                                saveDpTextImageMutation.mutate({
+                                  title: "DP Section " + Date.now(),
+                                  type: "text-image",
+                                  url: dpTextImageUrl,
+                                  textContent: dpTextContent,
+                                  imageAlignment: dpImageAlignment,
+                                  projectId: activeProjectId!,
+                                  isDesignProcess: true,
+                                })
+                              }
+                            >
+                              Add Design Process Text-Image
+                            </Button>
+                          </Card>
+                        </TabsContent>
+                      </Tabs>
+                    </TabsContent>
                   </Tabs>
 
                   <div className="border-t pt-8">
@@ -952,11 +1204,27 @@ function AdminDashboard() {
                       className="text-xl font-semibold mb-6 truncate"
                     />
                     <AdminSortableMediaList
-                      key={activeProjectId || "none"}
+                      key={(activeProjectId || "none") + "-regular"}
                       items={mediaList.filter(
                         (m: MediaItem) =>
                           m.projectId?._id?.toString() ===
-                          activeProjectId?.toString(),
+                          activeProjectId?.toString() && !m.isDesignProcess,
+                      )}
+                    />
+                  </div>
+
+                  <div className="border-t pt-8">
+                    <OverflowTooltipText
+                      as="h3"
+                      text={`${projects.find((p: ProjectItem) => p._id === activeProjectId)?.name || ""} Design Process`}
+                      className="text-xl font-semibold mb-6 truncate"
+                    />
+                    <AdminSortableMediaList
+                      key={(activeProjectId || "none") + "-dp"}
+                      items={mediaList.filter(
+                        (m: MediaItem) =>
+                          m.projectId?._id?.toString() ===
+                          activeProjectId?.toString() && m.isDesignProcess === true,
                       )}
                     />
                   </div>

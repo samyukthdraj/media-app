@@ -62,16 +62,20 @@ export default async function ProjectPage({
     );
   }
 
-  const projectMedia = (res.data.media as IMedia[]).filter((m: IMedia) => {
+  const allProjectMedia = (res.data.media as IMedia[]).filter((m: IMedia) => {
     const pId = m.projectId;
     const matchesId = typeof pId === "string" ? pId === id : pId?._id === id;
     return (matchesId && !!m.url) || (matchesId && m.type === "text-image");
   });
 
+  const projectMedia = allProjectMedia.filter((m) => !m.isDesignProcess);
+  const designProcessMedia = allProjectMedia.filter((m) => m.isDesignProcess === true);
+
   return (
     <ProjectDetailViewer
       project={project}
       media={projectMedia}
+      designProcessMedia={designProcessMedia}
       settings={settings}
     />
   );

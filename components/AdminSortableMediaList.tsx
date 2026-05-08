@@ -38,7 +38,8 @@ interface MediaItem {
   order?: number;
   textContent?: string;
   imageAlignment?: "left" | "right";
-  displaySize?: "half" | "full";
+  displaySize?: "half" | "full" | "quarter";
+  isDesignProcess?: boolean;
   projectId?: string | { _id: string };
 }
 
@@ -155,8 +156,14 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
               {item.type === 'image' && (
                 <div className="flex gap-1 bg-slate-50 p-0.5 rounded border">
                    <button 
+                    onClick={() => updateMutation.mutate({ displaySize: "quarter" })}
+                    className={`text-[9px] px-1.5 py-0.5 rounded font-bold transition-all ${item.displaySize === 'quarter' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                   >
+                    25%
+                   </button>
+                   <button 
                     onClick={() => updateMutation.mutate({ displaySize: "half" })}
-                    className={`text-[9px] px-1.5 py-0.5 rounded font-bold transition-all ${item.displaySize !== 'full' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`text-[9px] px-1.5 py-0.5 rounded font-bold transition-all ${item.displaySize !== 'full' && item.displaySize !== 'quarter' ? 'bg-primary text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                    >
                     50%
                    </button>
@@ -196,11 +203,11 @@ function SortableItem({ item, qc }: { item: MediaItem, qc: QueryClient }) {
                       <div className="flex gap-4 items-center justify-center">
                         <label className="flex items-center gap-2 cursor-pointer text-sm">
                           <input type="radio" checked={editAlignment === "left"} onChange={() => setEditAlignment("left")} />
-                          Text Left, Image Right
+                          Image Left
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer text-sm">
                           <input type="radio" checked={editAlignment === "right"} onChange={() => setEditAlignment("right")} />
-                          Image Left, Text Right
+                          Image Right
                         </label>
                       </div>
                       <Button 
