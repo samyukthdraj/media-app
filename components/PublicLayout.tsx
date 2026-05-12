@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { IHomePageSettings, ISocialLink } from "@/lib/models";
 
 
-export function Navbar() {
+export function Navbar({ settings }: { settings?: IHomePageSettings | null }) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const isWorkPage = pathname.startsWith("/work");
@@ -49,9 +49,20 @@ export function Navbar() {
             href="/"
             className="absolute left-1/2 -translate-x-1/2 z-50 flex flex-col items-center group transition-transform hover:scale-105 active:scale-95"
           >
-            <span className="font-black text-2xl md:text-4xl tracking-[0.4em] uppercase text-slate-900 leading-none mr-[-0.4em]">
-              {brandName}
-            </span>
+            {settings?.logoUrl ? (
+              <div className="relative h-10 md:h-14 w-32 md:w-48">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={settings.logoUrl}
+                  alt={brandName}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            ) : (
+              <span className="font-black text-2xl md:text-4xl tracking-[0.4em] uppercase text-slate-900 leading-none mr-[-0.4em]">
+                {brandName}
+              </span>
+            )}
           </Link>
 
           {/* Right Side: Mobile Hamburger or Desktop Placeholder */}
@@ -82,9 +93,20 @@ export function Navbar() {
               onClick={() => setIsOpen(false)}
               className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center"
             >
-              <span className="font-black text-2xl tracking-[0.3em] uppercase text-slate-900 leading-none mr-[-0.3em]">
-                {brandName}
-              </span>
+              {settings?.logoUrl ? (
+                <div className="relative h-8 w-24">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={settings.logoUrl}
+                    alt={brandName}
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+              ) : (
+                <span className="font-black text-2xl tracking-[0.3em] uppercase text-slate-900 leading-none mr-[-0.3em]">
+                  {brandName}
+                </span>
+              )}
             </Link>
           </div>
           <div className="flex-1 flex flex-col items-center justify-center gap-12 text-2xl font-bold tracking-widest uppercase">

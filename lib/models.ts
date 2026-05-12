@@ -40,8 +40,10 @@ export interface ISocialLink {
 
 export interface IHomePageSettings {
   name: string;
+  title?: string;
   bio: string;
   heroImageUrl: string;
+  logoUrl?: string;
   socialLinks: ISocialLink[];
 }
 

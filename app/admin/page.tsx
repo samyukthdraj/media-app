@@ -658,14 +658,35 @@ function AdminDashboard() {
 
                   <Tabs defaultValue="p-photo" className="w-full">
                     <div className="flex justify-center mb-6">
-                      <TabsList className="grid w-full max-w-2xl grid-cols-5 bg-muted/50">
-                        <TabsTrigger value="p-thumbnail">Thumbnail</TabsTrigger>
-                        <TabsTrigger value="p-photo">Photos</TabsTrigger>
-                        <TabsTrigger value="p-video">Videos</TabsTrigger>
-                        <TabsTrigger value="p-textimage">
+                      <TabsList className="flex w-full max-w-2xl overflow-x-auto justify-start sm:grid sm:grid-cols-5 bg-muted/50 p-1 h-auto sm:h-10 gap-1.5 sm:gap-0">
+                        <TabsTrigger
+                          value="p-thumbnail"
+                          className="flex-none sm:flex-1 py-2 sm:py-0 px-4 sm:px-0"
+                        >
+                          Thumbnail
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="p-photo"
+                          className="flex-none sm:flex-1 py-2 sm:py-0 px-4 sm:px-0"
+                        >
+                          Photos
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="p-video"
+                          className="flex-none sm:flex-1 py-2 sm:py-0 px-4 sm:px-0"
+                        >
+                          Videos
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="p-textimage"
+                          className="flex-none sm:flex-1 py-2 sm:py-0 px-4 sm:px-0"
+                        >
                           Text-Image
                         </TabsTrigger>
-                        <TabsTrigger value="p-designprocess">
+                        <TabsTrigger
+                          value="p-designprocess"
+                          className="flex-none sm:flex-1 py-2 sm:py-0 px-4 sm:px-0"
+                        >
                           Design Process
                         </TabsTrigger>
                       </TabsList>
@@ -1470,10 +1491,12 @@ function AdminDashboard() {
 function HomeSettingsForm({ initialData }: { initialData: IHomePageSettings }) {
   const queryClient = useQueryClient();
   const [hpName, setHpName] = useState(initialData.name || "");
+  const [hpTitle, setHpTitle] = useState(initialData.title || "");
   const [hpBio, setHpBio] = useState(initialData.bio || "");
   const [hpHeroImage, setHpHeroImage] = useState(
     initialData.heroImageUrl || "",
   );
+  const [hpLogoUrl, setHpLogoUrl] = useState(initialData.logoUrl || "");
   const [hpSocialLinks, setHpSocialLinks] = useState(
     initialData.socialLinks || [],
   );
@@ -1482,6 +1505,12 @@ function HomeSettingsForm({ initialData }: { initialData: IHomePageSettings }) {
     onClientUploadComplete: (res) => {
       if (res?.[0]) setHpHeroImage(res[0].url);
       toast.success("Hero image uploaded");
+    },
+  });
+  const { startUpload: startLogoUpload } = useUploadThing("imageUploader", {
+    onClientUploadComplete: (res) => {
+      if (res?.[0]) setHpLogoUrl(res[0].url);
+      toast.success("Logo uploaded");
     },
   });
 
@@ -1514,8 +1543,10 @@ function HomeSettingsForm({ initialData }: { initialData: IHomePageSettings }) {
           onClick={() =>
             updateHomeSettingsMutation.mutate({
               name: hpName,
+              title: hpTitle,
               bio: hpBio,
               heroImageUrl: hpHeroImage,
+              logoUrl: hpLogoUrl,
               socialLinks: hpSocialLinks,
             })
           }
@@ -1541,12 +1572,22 @@ function HomeSettingsForm({ initialData }: { initialData: IHomePageSettings }) {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-bold uppercase tracking-tight text-slate-400">
-                Main Name / Title
+                Main Name
               </label>
               <Input
                 value={hpName}
                 onChange={(e) => setHpName(e.target.value)}
-                placeholder="e.g. EHAS | Neha Sreejith's Portfolio"
+                placeholder="e.g. Neha Sreejith"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold uppercase tracking-tight text-slate-400">
+                Subtitle / Extra Title (Bold)
+              </label>
+              <Input
+                value={hpTitle}
+                onChange={(e) => setHpTitle(e.target.value)}
+                placeholder="e.g. Visual Artist & Photographer"
               />
             </div>
             <div className="space-y-2">
@@ -1563,52 +1604,101 @@ function HomeSettingsForm({ initialData }: { initialData: IHomePageSettings }) {
           </CardContent>
         </Card>
 
-        {/* Hero Image */}
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle>Hero Image</CardTitle>
-            <CardDescription>
-              The main image displayed on your home page.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {hpHeroImage ? (
-              <div className="relative aspect-4/5 w-full border rounded-xl overflow-hidden bg-slate-50">
-                <Image
-                  src={hpHeroImage}
-                  alt="Hero"
-                  fill
-                  className="object-contain p-4"
-                  unoptimized
-                />
-                <Button
-                  variant="destructive"
-                  size="icon-sm"
-                  className="absolute top-2 right-2 shadow-lg"
-                  onClick={() => setHpHeroImage("")}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            ) : (
-              <label className="aspect-4/5 w-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors">
-                <ImageIcon className="w-12 h-12 text-slate-300" />
-                <span className="text-sm font-medium text-slate-500">
-                  Upload Hero Image
-                </span>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files?.[0])
-                      startHeroUpload([e.target.files[0]]);
-                  }}
-                />
-              </label>
-            )}
-          </CardContent>
-        </Card>
+        {/* Logo & Hero Image */}
+        <div className="space-y-8">
+          {/* Logo */}
+          <Card className="border-0 shadow-md">
+            <CardHeader>
+              <CardTitle>Logo</CardTitle>
+              <CardDescription>
+                Your brand logo. Falls back to EHAS if empty.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {hpLogoUrl ? (
+                <div className="relative h-20 w-full border rounded-xl overflow-hidden bg-slate-50 flex items-center justify-center p-4">
+                  <Image
+                    src={hpLogoUrl}
+                    alt="Logo"
+                    width={150}
+                    height={60}
+                    className="object-contain"
+                    unoptimized
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon-sm"
+                    className="absolute top-1 right-1 shadow-lg"
+                    onClick={() => setHpLogoUrl("")}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              ) : (
+                <label className="h-20 w-full border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-slate-50 transition-colors">
+                  <ImageIcon className="w-5 h-5 text-slate-300" />
+                  <span className="text-[10px] font-medium text-slate-500">
+                    Upload Logo
+                  </span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.[0])
+                        startLogoUpload([e.target.files[0]]);
+                    }}
+                  />
+                </label>
+              )}
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-md">
+            <CardHeader>
+              <CardTitle>Hero Image</CardTitle>
+              <CardDescription>
+                The main image displayed on your home page.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {hpHeroImage ? (
+                <div className="relative aspect-4/5 w-full border rounded-xl overflow-hidden bg-slate-50">
+                  <Image
+                    src={hpHeroImage}
+                    alt="Hero"
+                    fill
+                    className="object-contain p-4"
+                    unoptimized
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon-sm"
+                    className="absolute top-2 right-2 shadow-lg"
+                    onClick={() => setHpHeroImage("")}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <label className="aspect-4/5 w-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors">
+                  <ImageIcon className="w-12 h-12 text-slate-300" />
+                  <span className="text-sm font-medium text-slate-500">
+                    Upload Hero Image
+                  </span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.[0])
+                        startHeroUpload([e.target.files[0]]);
+                    }}
+                  />
+                </label>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Social Links */}
         <Card className="border-0 shadow-md md:col-span-2">

@@ -14,9 +14,11 @@ export async function getHomePageSettingsAction() {
       // Return default settings if none exist
       const defaultSettings: IHomePageSettings = {
         name: "EHAS - Neha Sreejith's Portfolio",
+        title: "",
         bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
         heroImageUrl:
           "https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?q=80&w=2000&auto=format&fit=crop",
+        logoUrl: "",
         socialLinks: [
           {
             platform: "Behance",

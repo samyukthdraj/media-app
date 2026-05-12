@@ -85,7 +85,7 @@ export default function ProjectDetailViewer({
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans overflow-x-hidden">
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="flex-1 w-full max-w-[1600px] mx-auto pb-24 pt-8 lg:pt-12">
         

@@ -32,7 +32,7 @@ export default async function WorkPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans overflow-x-hidden">
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="flex-1 w-full max-w-[1600px] mx-auto px-6 lg:px-12 py-8 lg:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">

@@ -17,25 +17,32 @@ export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans">
       <PageTransition />
-      <Navbar />
+      <Navbar settings={settings} />
 
       <main className="flex-1 w-full flex items-center py-8 lg:py-12">
         <div className="w-full max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col-reverse md:flex-row gap-8 lg:gap-16 items-center">
           {/* Left Side Text */}
-          <div className="w-full md:w-1/2 flex flex-col justify-center space-y-12">
+          <div className="w-full md:w-1/2 flex flex-col justify-center space-y-8">
             <div className="flex flex-col space-y-4 border-b border-slate-100 pb-6">
               <p className="text-xs font-bold tracking-[0.3em] uppercase text-slate-400">
                 About Me
               </p>
               <h1 className="text-4xl lg:text-7xl font-bold tracking-tighter text-slate-900 leading-none">
-                NEHA SREEJITH
-                <br />
+                {settings?.name || "NEHA SREEJITH"}
               </h1>
             </div>
 
-            <p className="text-base lg:text-xl text-slate-600 font-light leading-relaxed max-w-lg whitespace-pre-wrap">
-              {settings?.bio || "Welcome to my portfolio."}
-            </p>
+            <div className="space-y-4">
+              {settings?.title && (
+                <p className="text-base lg:text-xl font-bold text-slate-900 uppercase tracking-wider">
+                  {settings.title}
+                </p>
+              )}
+
+              <p className="text-base lg:text-xl text-slate-600 font-light leading-relaxed max-w-lg whitespace-pre-wrap">
+                {settings?.bio || "Welcome to my portfolio."}
+              </p>
+            </div>
           </div>
 
           <HeroImage
