@@ -9,6 +9,10 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://neha-sreejith.vercel.app"),
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
   title: {
     default: "EHAS | Visual Portfolio",
     template: "%s | EHAS",

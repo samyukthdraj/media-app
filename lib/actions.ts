@@ -19,6 +19,7 @@ export async function getHomePageSettingsAction() {
         heroImageUrl:
           "https://images.unsplash.com/photo-1615184697985-c9bde1b07da7?q=80&w=2000&auto=format&fit=crop",
         logoUrl: "",
+        contactEmail: "",
         socialLinks: [
           {
             platform: "Behance",

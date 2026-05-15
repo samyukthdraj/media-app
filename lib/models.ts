@@ -44,6 +44,7 @@ export interface IHomePageSettings {
   bio: string;
   heroImageUrl: string;
   logoUrl?: string;
+  contactEmail?: string;
   socialLinks: ISocialLink[];
 }
 

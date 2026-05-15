@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Mail } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { IHomePageSettings, ISocialLink } from "@/lib/models";
 
@@ -167,6 +167,16 @@ export function Footer({ settings }: { settings?: IHomePageSettings | null }) {
             Contact me at:
           </span>
           <div className="flex flex-wrap items-center justify-center gap-5">
+            {settings?.contactEmail && (
+              <a
+                href={`mailto:${settings.contactEmail}`}
+                className="hover:text-primary transition-colors text-slate-800 flex items-center gap-1.5 group text-[10px] font-bold tracking-widest uppercase"
+                title="Email"
+              >
+                <Mail className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity" />
+                <span>Mail</span>
+              </a>
+            )}
             {socialLinks.map((link: ISocialLink, idx: number) => {
               const showIcon =
                 link.displayStyle === "icon" || link.displayStyle === "both";

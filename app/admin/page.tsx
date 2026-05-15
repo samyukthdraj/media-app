@@ -47,6 +47,7 @@ import {
   FileText,
   Home,
   Plus,
+  Mail,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -1500,6 +1501,9 @@ function HomeSettingsForm({ initialData }: { initialData: IHomePageSettings }) {
   const [hpSocialLinks, setHpSocialLinks] = useState(
     initialData.socialLinks || [],
   );
+  const [hpContactEmail, setHpContactEmail] = useState(
+    initialData.contactEmail || "",
+  );
 
   const { startUpload: startHeroUpload } = useUploadThing("imageUploader", {
     onClientUploadComplete: (res) => {
@@ -1547,6 +1551,7 @@ function HomeSettingsForm({ initialData }: { initialData: IHomePageSettings }) {
               bio: hpBio,
               heroImageUrl: hpHeroImage,
               logoUrl: hpLogoUrl,
+              contactEmail: hpContactEmail,
               socialLinks: hpSocialLinks,
             })
           }
@@ -1599,6 +1604,17 @@ function HomeSettingsForm({ initialData }: { initialData: IHomePageSettings }) {
                 value={hpBio}
                 onChange={(e) => setHpBio(e.target.value)}
                 placeholder="Tell your story..."
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold uppercase tracking-tight text-slate-400 flex items-center gap-2">
+                <Mail className="w-3 h-3" /> Contact Email
+              </label>
+              <Input
+                type="email"
+                value={hpContactEmail}
+                onChange={(e) => setHpContactEmail(e.target.value)}
+                placeholder="e.g. contact@example.com"
               />
             </div>
           </CardContent>
