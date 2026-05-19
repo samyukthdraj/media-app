@@ -34,12 +34,12 @@ export default async function Home() {
 
             <div className="space-y-4">
               {settings?.title && (
-                <p className="text-base lg:text-xl font-bold text-slate-900 uppercase tracking-wider">
+                <p className="text-sm sm:text-base lg:text-xl font-bold text-slate-900 uppercase tracking-wider whitespace-nowrap">
                   {settings.title}
                 </p>
               )}
 
-              <p className="text-base lg:text-xl text-slate-600 font-light leading-relaxed max-w-lg whitespace-pre-wrap">
+              <p className="text-base lg:text-xl text-slate-600 font-light leading-relaxed max-w-lg whitespace-pre-wrap text-justify">
                 {settings?.bio || "Welcome to my portfolio."}
               </p>
             </div>
