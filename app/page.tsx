@@ -39,7 +39,7 @@ export default async function Home() {
                 </p>
               )}
 
-              <p className="text-base lg:text-xl text-slate-600 font-light leading-relaxed max-w-lg whitespace-pre-wrap text-justify">
+              <p className="text-base lg:text-xl text-slate-600 font-light leading-relaxed max-w-lg whitespace-pre-wrap">
                 {settings?.bio || "Welcome to my portfolio."}
               </p>
             </div>
